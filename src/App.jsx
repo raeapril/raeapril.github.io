@@ -1,16 +1,28 @@
-import { Routes, Route, Link } from 'react-router-dom'
+import { Routes, Route } from "react-router-dom";
 
-import './App.css'
-import Home from './Home'
-import Contact from './Contact'
+import Nav from "./components/Nav";
+import Footer from "./components/Footer";
+import ScrollToTop from "./components/ScrollToTop";
+import Intro from "./components/Intro";
+import RouteTransition from "./components/RouteTransition";
+import Home from "./Home";
+import Contact from "./Contact";
 
 function App() {
-    return (
+  return (
+    <>
+      <Intro />
+      <ScrollToTop />
+      <Nav />
+      <RouteTransition>
         <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/contact" element={<Contact />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/contact" element={<Contact />} />
         </Routes>
-    )
+      </RouteTransition>
+      <Footer />
+    </>
+  );
 }
 
-export default App
+export default App;
