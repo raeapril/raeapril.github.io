@@ -1,26 +1,51 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * 스크롤 고정(sticky) 히어로.
- * - 처음엔 사진들이 방사형(부채꼴)로 펼쳐져 있음
- * - 스크롤할수록 뒤 사진들은 블러 + 페이드 + 바깥으로 퍼지고
- * - 맨 앞(중앙) 사진이 풀스크린으로 확대됨
+ * 스크롤 고정(sticky) 히어로 — Playfight 스타일.
+ * - 처음엔 사진들이 화면 가장자리에 흩뿌려져(scatter) 있고 가운데 세리프 헤드라인
+ * - 스크롤할수록 흩뿌린 사진들은 블러 + 페이드 + 바깥으로 흩어지고
+ * - 맨 아래 중앙 사진이 풀스크린으로 확대됨
  *
- * 동작 원리: 높이 250vh 구간을 스크롤 트랙으로 쓰고, 안의 100vh 박스를
- * position:sticky 로 고정. 트랙을 지나는 진행도 p(0~1)로 모든 값을 보간.
+ * 높이 260vh 트랙을 스크롤하는 동안 안쪽 100vh 박스를 sticky 로 고정,
+ * 진행도 p(0~1)로 모든 값을 보간.
  *
  * TODO: 사진(picsum)을 본인 작업물 이미지로 교체하세요.
  */
 
-// 뒤에서 부채꼴로 펼쳐질 사진들 (angle = 부채꼴 각도)
-const FAN = [
-  { src: "https://picsum.photos/seed/rae-fan1/700/900", angle: -46 },
-  { src: "https://picsum.photos/seed/rae-fan2/700/900", angle: -23 },
-  { src: "https://picsum.photos/seed/rae-fan3/700/900", angle: 23 },
-  { src: "https://picsum.photos/seed/rae-fan4/700/900", angle: 46 },
+// 가운데 세리프 헤드라인 (자유롭게 수정)
+const HEADLINE = "Detail is Everything.";
+const SUBCOPY = "Frontend Publishing · Made with care in Seoul";
+
+// 흩뿌려진 사진들 (가장자리 배치). pos = 시작 위치/크기, drift = 스크롤 시 흩어질 방향
+const SCATTER = [
+  {
+    src: "https://picsum.photos/seed/rae-a/600/800",
+    pos: { left: "13%", top: "7%", width: "14vw", height: "42vh" },
+    drift: { x: -10, y: -6 },
+  },
+  {
+    src: "https://picsum.photos/seed/rae-b/700/500",
+    pos: { left: "8%", top: "48%", width: "16vw", height: "20vh" },
+    drift: { x: -12, y: 4 },
+  },
+  {
+    src: "https://picsum.photos/seed/rae-c/600/450",
+    pos: { left: "16%", top: "73%", width: "11vw", height: "15vh" },
+    drift: { x: -8, y: 8 },
+  },
+  {
+    src: "https://picsum.photos/seed/rae-d/900/600",
+    pos: { left: "62%", top: "9%", width: "25vw", height: "26vh" },
+    drift: { x: 12, y: -6 },
+  },
+  {
+    src: "https://picsum.photos/seed/rae-e/700/900",
+    pos: { left: "71%", top: "42%", width: "15vw", height: "25vh" },
+    drift: { x: 12, y: 5 },
+  },
 ];
 
-// 풀스크린으로 커질 맨 앞 사진
+// 풀스크린으로 커질 맨 아래 중앙 사진
 const HERO_IMG = "https://picsum.photos/seed/rae-hero-main/1800/1100";
 
 const clamp = (v, min = 0, max = 1) => Math.min(Math.max(v, min), max);
@@ -62,72 +87,86 @@ function Hero() {
     };
   }, []);
 
-  // 모션 최소화: 정적인 단순 히어로
+  // 모션 최소화: 정적 히어로
   if (reduce) {
     return (
-      <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-ink text-paper">
-        <img
-          src={HERO_IMG}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover opacity-60"
-        />
-        <div className="relative z-10 text-center">
-          <h1 className="display text-[14vw] leading-[0.86] md:text-[10vw]">
-            CRAFTING
-            <br />
-            CLEAN <span className="text-accent">UI</span>
-          </h1>
+      <section className="relative flex min-h-screen items-center justify-center px-6 text-center">
+        <div>
+          <h1 className="font-serif text-3xl font-normal leading-tight tracking-tight sm:text-4xl md:text-5xl lg:text-[3.2vw]">{HEADLINE}</h1>
+          <p className="mt-5 text-sm text-muted md:text-base">{SUBCOPY}</p>
         </div>
       </section>
     );
   }
 
   // 진행도 기반 파생값
-  const heroW = 42 + p * 58; // 42vw → 100vw
-  const heroH = 56 + p * 44; // 56vh → 100vh
-  const heroRadius = (1 - p) * 20; // 20px → 0
-  const introOpacity = clamp(1 - p * 2.2); // 펼쳐진 단계의 카피 (서서히 사라짐)
-  const endOpacity = clamp((p - 0.55) * 2.6); // 풀스크린 단계의 타이틀 (서서히 등장)
-  const fanBlur = p * 14; // 0 → 14px
-  const fanFade = clamp(1 - p * 1.5); // 1 → 0
+  const heroW = 26 + p * 74; // 26vw → 100vw
+  const heroH = 34 + p * 66; // 34vh → 100vh
+  const heroLeft = (100 - heroW) / 2; // 항상 가로 중앙
+  const heroTop = 62 * (1 - p); // 62vh → 0
+
+  const centerOpacity = clamp(1 - p * 1.8); // 가운데 헤드라인 (사라짐)
+  const endOpacity = clamp((p - 0.6) * 2.8); // 풀스크린 타이틀 (등장)
+  const scatterBlur = p * 16;
+  const scatterFade = clamp(1 - p * 1.6);
 
   return (
     <section ref={trackRef} className="relative h-[260vh]">
-      <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden bg-paper">
-        {/* 뒤 사진들 (방사형) */}
-        <div className="pointer-events-none absolute bottom-0 left-1/2 h-0 w-0">
-          {FAN.map((f, i) => {
-            // 스크롤할수록 더 벌어지고 위로 떠오름
-            const angle = f.angle * (1 + p * 0.5);
-            const lift = 30 + p * 18; // vmin
-            return (
-              <img
-                key={i}
-                src={f.src}
-                alt=""
-                className="absolute h-[40vmin] w-[28vmin] rounded-2xl object-cover shadow-2xl"
-                style={{
-                  left: 0,
-                  bottom: 0,
-                  transformOrigin: "bottom center",
-                  transform: `translateX(-50%) rotate(${angle}deg) translateY(-${lift}vmin) scale(${
-                    1 - p * 0.15
-                  })`,
-                  filter: `blur(${fanBlur}px)`,
-                  opacity: fanFade,
-                }}
-              />
-            );
-          })}
+      <div className="sticky top-0 h-screen overflow-hidden bg-paper">
+        {/* 양옆 세로 텍스트 */}
+        <span
+          className="absolute left-4 top-1/2 hidden -translate-y-1/2 text-xs tracking-widest text-muted [writing-mode:vertical-rl] md:block"
+          style={{ opacity: scatterFade }}
+        >
+          © {new Date().getFullYear()}
+        </span>
+        <span
+          className="absolute right-4 top-1/2 hidden -translate-y-1/2 rotate-180 text-xs tracking-widest text-muted [writing-mode:vertical-rl] md:block"
+          style={{ opacity: scatterFade }}
+        >
+          Made in Seoul
+        </span>
+
+        {/* 흩뿌린 사진들 — 레퍼런스(Playfight)처럼 각진 모서리 + 그림자 없음 */}
+        {SCATTER.map((img, i) => (
+          <img
+            key={i}
+            src={img.src}
+            alt=""
+            loading="lazy"
+            className="absolute object-cover"
+            style={{
+              ...img.pos,
+              transform: `translate(${img.drift.x * p}vw, ${
+                img.drift.y * p
+              }vh) scale(${1 - p * 0.1})`,
+              filter: `blur(${scatterBlur}px)`,
+              opacity: scatterFade,
+            }}
+          />
+        ))}
+
+        {/* 가운데 세리프 헤드라인 */}
+        <div
+          className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center"
+          style={{ opacity: centerOpacity }}
+        >
+          <h1 className="font-serif text-3xl font-normal leading-[1.05] tracking-tight sm:text-4xl md:text-5xl lg:text-[3.2vw]">
+            {HEADLINE}
+          </h1>
+          <p className="mt-5 text-sm font-medium text-muted md:text-base">
+            {SUBCOPY}
+          </p>
         </div>
 
-        {/* 맨 앞 사진 (풀스크린으로 확대) */}
+        {/* 맨 아래 중앙 사진 → 풀스크린 (레퍼런스처럼 각진 모서리, 그림자 없음) */}
         <div
-          className="relative overflow-hidden bg-ink shadow-2xl"
+          className="absolute overflow-hidden bg-ink"
           style={{
+            left: `${heroLeft}vw`,
+            top: `${heroTop}vh`,
             width: `${heroW}vw`,
             height: `${heroH}vh`,
-            borderRadius: `${heroRadius}px`,
           }}
         >
           <img
@@ -135,39 +174,16 @@ function Hero() {
             alt="Featured work"
             className="h-full w-full object-cover"
           />
-          {/* 풀스크린 단계에서 어둡게 깔리는 그라데이션 */}
           <div
             className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent"
             style={{ opacity: endOpacity }}
           />
-          {/* 풀스크린 단계 타이틀 */}
           <div
-            className="absolute inset-0 flex flex-col items-center justify-end pb-[10vh] text-center text-paper"
+            className="absolute inset-0 flex items-end justify-center pb-[12vh] text-center text-paper"
             style={{ opacity: endOpacity }}
           >
-            <h1 className="display text-[12vw] leading-[0.86] md:text-[9vw]">
-              CRAFTING
-              <br />
-              CLEAN <span className="text-accent">UI</span>
-            </h1>
+            <h2 className="font-serif text-5xl md:text-7xl">{HEADLINE}</h2>
           </div>
-        </div>
-
-        {/* 펼쳐진 단계의 인트로 카피 (위에 떠 있다가 사라짐) */}
-        <div
-          className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center text-center"
-          style={{ opacity: introOpacity }}
-        >
-          <p className="eyebrow mb-6">Frontend Publisher · Seoul</p>
-          <h2 className="display text-[14vw] leading-[0.86] md:text-[8vw]">
-            CRAFTING <span className="text-accent">CLEAN</span> UI
-          </h2>
-          <p className="mt-6 max-w-md text-base text-muted">
-            픽셀 하나까지 신경 쓰는 퍼블리셔.
-            <br />
-            스크롤해서 둘러보세요.
-          </p>
-          <span className="mt-10 animate-bounce text-2xl text-ink">↓</span>
         </div>
       </div>
     </section>

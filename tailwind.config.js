@@ -21,6 +21,7 @@ export default {
           "system-ui",
           "sans-serif",
         ],
+        serif: ["Fraunces", "Georgia", "Times New Roman", "serif"],
       },
       letterSpacing: {
         tightest: "-0.04em",
