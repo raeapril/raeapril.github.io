@@ -11,7 +11,6 @@ import { useEffect, useRef, useState } from "react";
  *
  * TODO: 사진(picsum)을 본인 작업물 이미지로 교체하세요.
  */
-
 // 가운데 세리프 헤드라인
 const HEADLINE = "Detail is Everything.";
 
@@ -26,7 +25,7 @@ const TYPE_PHRASES = [
 const SCATTER = [
   {
     src: "https://picsum.photos/seed/rae-a/600/800",
-    pos: { left: "13%", top: "7%", width: "14vw", height: "42vh" },
+    pos: { left: "13%", top: "7%", width: "14vw", height: "33vh" },
     drift: { x: -10, y: -6 },
   },
   {
@@ -216,15 +215,37 @@ function Hero() {
           />
         ))}
 
-        {/* 가운데 세리프 헤드라인 */}
+        {/* 가운데 세리프 헤드라인 — 인트로 MEERAE가 사라질 때 한 글자씩 위→아래로 등장 */}
         <div
           className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center"
           style={{ opacity: centerOpacity }}
         >
           <h1 className="font-serif text-3xl font-normal leading-[1.05] tracking-tight sm:text-4xl md:text-5xl lg:text-[3.2vw]">
-            {HEADLINE}
+            {HEADLINE.split("").map((ch, i) =>
+              ch === " " ? (
+                <span key={i} style={{ display: "inline-block", width: "0.28em" }} />
+              ) : (
+                <span
+                  key={i}
+                  className="hero-char"
+                  style={{
+                    transitionDelay: `${i * 34}ms`,
+                    opacity: introDone ? 1 : 0,
+                    transform: introDone ? "translateY(0)" : "translateY(-0.55em)",
+                  }}
+                >
+                  {ch}
+                </span>
+              )
+            )}
           </h1>
-          <p className="mt-5 min-h-[1.5em] text-sm font-medium text-muted md:text-base">
+          <p
+            className="mt-5 min-h-[1.5em] text-sm font-medium text-muted md:text-base"
+            style={{
+              opacity: introDone ? 1 : 0,
+              transition: "opacity 0.6s ease 0.5s",
+            }}
+          >
             {typed}
             <span className="type-caret" aria-hidden="true">&nbsp;</span>
           </p>

@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 
-// TODO: 본인 정보로 교체하세요.
 const EMAIL = "meerae.shin@gmail.com";
 
 function Footer() {

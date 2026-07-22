@@ -2,10 +2,13 @@ import { Link } from "react-router-dom";
 import Reveal from "./components/Reveal";
 import ScrollScale from "./components/ScrollScale";
 import Hero from "./components/Hero";
+import TiltCard from "./components/TiltCard";
+import WorkWaves from "./components/WorkWaves";
 
 /* ------------------------------------------------------------------ */
 /*  데이터: 본인 내용으로 자유롭게 교체하세요.                          */
 /* ------------------------------------------------------------------ */
+const EMAIL = "meerae.shin@gmail.com";
 
 const SKILLS = [
   "HTML",
@@ -84,6 +87,20 @@ const WORKS = [
     href: "#",
     image: "https://picsum.photos/seed/raework-promo/900/680",
   },
+  {
+    title: "Portfolio Site",
+    tags: ["Publishing", "Motion"],
+    year: "2024",
+    href: "#",
+    image: "https://picsum.photos/seed/raework-portfolio/900/680",
+  },
+  {
+    title: "Campaign Page",
+    tags: ["Responsive", "Interaction"],
+    year: "2023",
+    href: "#",
+    image: "https://picsum.photos/seed/raework-campaign/900/680",
+  },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -98,7 +115,7 @@ function Home() {
       <section className="container-x py-20 md:py-28">
         <Reveal>
           <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-            <p className="max-w-xl text-lg leading-relaxed text-muted md:text-2xl">
+            <p className="max-w-xl text-lg leading-relaxed leading-[1.3] text-muted md:text-2xl md:leading-[1.3]">
               픽셀 하나까지 신경 쓰는 퍼블리셔.
               <br />
               접근성과 인터랙션을 함께 고민하며,
@@ -110,9 +127,9 @@ function Home() {
               <a href="#work" className="btn btn-solid">
                 작업 보기
               </a>
-              <Link to="/contact" className="btn btn-ghost">
-                연락하기
-              </Link>
+              <a href="#work" className="btn btn-solid">
+                작업 보기
+              </a>
             </div>
           </div>
         </Reveal>
@@ -137,7 +154,7 @@ function Home() {
         <div className="grid gap-12 md:grid-cols-[1fr_2fr] md:gap-20">
           <Reveal>
             <p className="eyebrow mb-4">What I do</p>
-            <h2 className="display text-4xl leading-[1.4] md:text-5xl md:leading-[1.4]">
+            <h2 className="display text-4xl leading-[1.2] md:text-5xl md:leading-[1.2]">
               하는 일,
               <br />
               잘하는 일.
@@ -163,13 +180,18 @@ function Home() {
       </section>
 
       {/* ---------------- SELECTED WORK ---------------- */}
-      <section id="work" data-nav="dark" className="bg-ink scroll-mt-24 py-24 text-paper md:py-36">
-        <div className="container-x">
+      <section
+        id="work"
+        data-nav="dark"
+        className="relative overflow-hidden bg-ink scroll-mt-24 py-24 text-paper md:py-36"
+      >
+        <WorkWaves />
+        <div className="container-x relative z-10">
           <Reveal>
             <div className="mb-14 flex items-end justify-between">
               <div>
                 <p className="eyebrow mb-4 text-muted">Selected work</p>
-                <h2 className="display text-4xl leading-[1.4] md:text-5xl md:leading-[1.4]">최근 작업</h2>
+                <h2 className="display text-4xl leading-[1.2] md:text-5xl md:leading-[1.2]">최근 작업</h2>
               </div>
               <span className="hidden text-sm text-muted sm:block">
                 ({String(WORKS.length).padStart(2, "0")})
@@ -177,19 +199,22 @@ function Home() {
             </div>
           </Reveal>
 
-          <div className="grid gap-x-8 gap-y-14 sm:grid-cols-2">
+          <div className="grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
             {WORKS.map((w, i) => (
-              <Reveal key={w.title} delay={(i % 2) * 120}>
+              <Reveal key={w.title} delay={(i % 3) * 120}>
                 <a href={w.href} className="group block">
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-paper/5">
-                    <ScrollScale className="h-full w-full" from={1.05} to={1.3}>
-                      <img
-                        src={w.image}
-                        alt={w.title}
-                        loading="lazy"
-                        className="h-full w-full object-cover"
-                      />
-                    </ScrollScale>
+                  {/* 프레임은 고정, 안의 이미지만 틸트 */}
+                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-paper/5">
+                    <TiltCard className="h-full w-full">
+                      <ScrollScale className="h-full w-full" from={1.05} to={1.3}>
+                        <img
+                          src={w.image}
+                          alt={w.title}
+                          loading="lazy"
+                          className="h-full w-full object-cover"
+                        />
+                      </ScrollScale>
+                    </TiltCard>
                     {/* 호버 시 살짝 어두워지는 오버레이 */}
                     <div className="pointer-events-none absolute inset-0 bg-ink/20 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                     <span className="pointer-events-none absolute left-5 top-4 display text-5xl text-paper/30 mix-blend-overlay md:text-6xl">

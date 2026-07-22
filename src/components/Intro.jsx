@@ -7,12 +7,15 @@ function signalIntroDone() {
 }
 
 /**
- * 도입부 프리로더: 0 → 100 숫자 카운팅 후 위로 슬라이드되며 사라짐.
- * (Playfight 스타일 인트로) 모션 최소화 선호 시 즉시 스킵.
+ * 도입부 프리로더 — 분리→합체 (letsplayfight 방식).
+ * 'RAE.' 를 좌(RA) / 우(E.) 두 조각으로 벌려 아래에서 떠올리고,
+ * 그 사이에서 숫자 000→100 카운팅. 100이 되면 두 조각이 가운데로 모여
+ * 합체되고 숫자는 사이로 사라진다. 이후 로더가 페이드되며 메인 등장.
+ * 모션 최소화 선호 시 즉시 스킵.
  */
 function Intro() {
   const [count, setCount] = useState(0);
-  const [leaving, setLeaving] = useState(false);
+  const [phase, setPhase] = useState("rise"); // rise → apart → join → plant → reveal
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
@@ -25,28 +28,41 @@ function Intro() {
 
     document.body.style.overflow = "hidden";
     let current = 0;
-    let timer;
+    const timers = [];
+
+    // 진입: 조각들이 아래에서 떠올라 벌어짐
+    timers.push(setTimeout(() => setPhase("apart"), 60));
 
     const tick = () => {
       // 끝으로 갈수록 천천히 (ease-out 느낌)
       current += Math.max(1, Math.ceil((100 - current) / 10));
       if (current >= 100) {
         setCount(100);
-        timer = setTimeout(() => setLeaving(true), 450); // 잠깐 멈췄다가
-        timer = setTimeout(() => {
-          setHidden(true);
-          document.body.style.overflow = "";
-          signalIntroDone();
-        }, 1500); // 슬라이드 아웃 후 제거
+        // 합체(join) → 배경 걷히며 RAE 박힘(plant) → RAE 사라짐(reveal) → 제거
+        timers.push(setTimeout(() => setPhase("join"), 350));
+        timers.push(setTimeout(() => setPhase("plant"), 1300));
+        timers.push(
+          setTimeout(() => {
+            // RAE 가 사라지기 시작하는 순간 히어로 헤드라인 등장 신호
+            setPhase("reveal");
+            signalIntroDone();
+          }, 2150)
+        );
+        timers.push(
+          setTimeout(() => {
+            setHidden(true);
+            document.body.style.overflow = "";
+          }, 2800)
+        );
         return;
       }
       setCount(current);
-      timer = setTimeout(tick, 80);
+      timers.push(setTimeout(tick, 80));
     };
 
-    timer = setTimeout(tick, 250);
+    timers.push(setTimeout(tick, 450));
     return () => {
-      clearTimeout(timer);
+      timers.forEach(clearTimeout);
       document.body.style.overflow = "";
     };
   }, []);
@@ -54,13 +70,32 @@ function Intro() {
   if (hidden) return null;
 
   return (
-    <div className={`intro ${leaving ? "intro--leaving" : ""}`} aria-hidden="true">
-      <div className="intro__inner">
-        <span className="intro__label">Portfolio — Loading</span>
+    <div className={`intro intro--${phase}`} aria-hidden="true">
+      <div className="intro__bg" />
+      <div className="intro__mark display">
+        <span className="intro__piece intro__piece--l">
+          {"MEE".split("").map((ch, i) => (
+            <span
+              key={i}
+              className="intro__char"
+              style={{ transitionDelay: `${i * 55}ms` }}
+            >
+              {ch}
+            </span>
+          ))}
+        </span>
+        <span className="intro__piece intro__piece--r">
+          {"RAE".split("").map((ch, i) => (
+            <span
+              key={i}
+              className="intro__char"
+              style={{ transitionDelay: `${(i + 3) * 55}ms` }}
+            >
+              {ch}
+            </span>
+          ))}
+        </span>
         <span className="intro__count">{String(count).padStart(3, "0")}</span>
-        <div className="intro__bar">
-          <span style={{ transform: `scaleX(${count / 100})` }} />
-        </div>
       </div>
     </div>
   );

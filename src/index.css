@@ -74,12 +74,14 @@
     }
   }
 
-  /* 타이핑 커서 깜빡임 */
+  /* 타이핑 커서 깜빡임 (네모 블록형) */
   .type-caret {
     display: inline-block;
-    width: 1px;
-    margin-left: 2px;
+    width: 0.5em;
+    height: 1.05em;
+    margin-left: 0.15em;
     background: currentColor;
+    vertical-align: -0.12em;
     animation: caret-blink 1s steps(1) infinite;
   }
   @keyframes caret-blink {
@@ -92,9 +94,21 @@
       opacity: 0;
     }
   }
+
+  /* 히어로 헤드라인 글자 단위 등장 (위→아래 또로로록) */
+  .hero-char {
+    display: inline-block;
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.4s ease;
+    will-change: transform, opacity;
+  }
 }
 
-/* ---------------- 도입부 프리로더 (Intro) ---------------- */
+/* ---------------- 도입부 프리로더 (Intro) ----------------
+   분리→합체 (letsplayfight 방식):
+   워드마크가 좌/우 두 조각으로 벌어진 채 아래에서 떠오르고, 그 사이에서
+   숫자가 000→100 카운팅. 100이 되면 두 조각이 가운데로 모여 'RAE.'로 합체
+   되고 숫자는 사이로 사라진다. 이후 로더가 페이드되며 메인 등장. */
 .intro {
   position: fixed;
   inset: 0;
@@ -102,48 +116,145 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #1a0f0a;
-  color: #e6f0f7;
-  transform: translateY(0);
-  transition: transform 1s cubic-bezier(0.76, 0, 0.24, 1);
+  color: #ffffff;
 }
-.intro--leaving {
-  transform: translateY(-100%);
+.intro__bg {
+  position: absolute;
+  inset: 0;
+  background: #111111;
+  transition: opacity 0.7s cubic-bezier(0.76, 0, 0.24, 1);
 }
-.intro__inner {
+/* plant/reveal: 배경이 걷히며 메인(밝은 배경) 노출 */
+.intro--plant .intro__bg,
+.intro--reveal .intro__bg {
+  opacity: 0;
+}
+
+/* 워드마크 조각 행 — 좌조각 / (가운데 숫자) / 우조각 */
+.intro__mark {
+  position: relative;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 1.5rem;
-  width: min(70vw, 560px);
-}
-.intro__label {
-  font-size: 0.7rem;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: #827c70;
-}
-.intro__count {
   font-weight: 700;
-  letter-spacing: -0.04em;
   line-height: 1;
-  font-size: clamp(5rem, 22vw, 16rem);
+  font-size: clamp(2rem, 8vw, 5.5rem);
+  transition: color 0.7s cubic-bezier(0.76, 0, 0.24, 1),
+    opacity 0.55s ease;
+}
+/* plant: 합체된 MEERAE 가 메인 배경색(ink)으로 바뀌며 중앙에 박힘 */
+.intro--plant .intro__mark,
+.intro--reveal .intro__mark {
+  color: #111111;
+}
+/* 글자 단위 — reveal 때 한 글자씩 위로 또로로록 사라짐 */
+.intro__char {
+  display: inline-block;
+  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1),
+    opacity 0.35s ease;
+  will-change: transform, opacity;
+}
+.intro--reveal .intro__char {
+  transform: translateY(-0.9em);
+  opacity: 0;
+}
+.intro__piece {
+  transition: transform 0.85s cubic-bezier(0.76, 0, 0.24, 1),
+    opacity 0.6s ease;
+  will-change: transform, opacity;
+}
+/* 기본(rise): 아래에서 + 벌어진 상태 + 투명 */
+.intro__piece--l {
+  transform: translate(-0.85em, 1.4rem);
+  opacity: 0;
+}
+.intro__piece--r {
+  transform: translate(0.85em, 1.4rem);
+  opacity: 0;
+}
+/* apart: 떠올라 벌어진 채로 표시 (카운팅 중) */
+.intro--apart .intro__piece--l {
+  transform: translate(-0.85em, 0);
+  opacity: 1;
+}
+.intro--apart .intro__piece--r {
+  transform: translate(0.85em, 0);
+  opacity: 1;
+}
+/* join 이후(plant/reveal 포함): 가운데로 모여 합체 상태 유지 */
+.intro--join .intro__piece--l,
+.intro--plant .intro__piece--l,
+.intro--reveal .intro__piece--l,
+.intro--join .intro__piece--r,
+.intro--plant .intro__piece--r,
+.intro--reveal .intro__piece--r {
+  transform: translate(0, 0);
+  opacity: 1;
+}
+
+/* 숫자 카운터 — 두 조각 사이 정중앙, 합체 시 사이로 사라짐 */
+.intro__count {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.4em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
-.intro__bar {
-  width: 100%;
-  height: 2px;
-  background: rgba(230, 240, 247, 0.15);
+.intro--apart .intro__count {
+  opacity: 1;
+}
+
+/* ---------------- 최근 작업 배경 웨이브 ---------------- */
+.work-waves {
+  position: absolute;
+  inset: 0;
   overflow: hidden;
+  pointer-events: none;
 }
-.intro__bar span {
-  display: block;
+.wave-track {
+  position: absolute;
+  inset: 0;
+  width: 200%;
   height: 100%;
+  will-change: transform;
+}
+.wave-track svg {
+  display: block;
   width: 100%;
-  background: #e6f0f7;
-  transform-origin: left;
-  transform: scaleX(0);
-  transition: transform 0.12s linear;
+  height: 100%;
+}
+.wave-track path {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+.wave-a {
+  animation: wave-flow 18s linear infinite;
+}
+.wave-b {
+  animation: wave-flow 27s linear infinite;
+}
+.wave-c {
+  animation: wave-flow 36s linear infinite;
+}
+@keyframes wave-flow {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wave-a,
+  .wave-b,
+  .wave-c {
+    animation: none;
+  }
 }
 
 /* ---------------- 라우트 전환 커튼 ---------------- */
@@ -151,7 +262,7 @@
   position: fixed;
   inset: 0;
   z-index: 90;
-  background: #16140f;
+  background: #111111;
   transform: scaleY(0);
   transform-origin: bottom;
   pointer-events: none;
