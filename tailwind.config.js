@@ -3,12 +3,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        // 따뜻한 뉴트럴 팔레트 (Playfight 무드)
-        ink: "#16140f", // 거의 검정 (따뜻한 톤)
-        paper: "#f4f1ea", // 따뜻한 오프화이트
-        muted: "#827c70", // 보조 텍스트
-        line: "#dcd6c9", // 구분선
-        accent: "#e0533d", // 포인트 (버닝 오렌지레드)
+        // 하늘색 + 진한 브라운 팔레트
+        ink: "#1a0f0a", // 진한 에스프레소 브라운 (어두운 섹션·본문·버튼)
+        paper: "#f4f6f8", // 쿨 오프화이트 (밝은 배경, 미세한 푸른기)
+        muted: "#7d6a5c", // 브라운 그레이 (보조 텍스트)
+        line: "#cbdae6", // 연한 블루그레이 (구분선)
+        accent: "#a8703f", // 카라멜 브라운 (포인트)
         // 기존 컬러 호환 유지
         "main-blue": "#3490dc",
         "point-pink": "#ff69b4",

@@ -73,6 +73,25 @@
       transform: translateX(-50%);
     }
   }
+
+  /* 타이핑 커서 깜빡임 */
+  .type-caret {
+    display: inline-block;
+    width: 1px;
+    margin-left: 2px;
+    background: currentColor;
+    animation: caret-blink 1s steps(1) infinite;
+  }
+  @keyframes caret-blink {
+    0%,
+    50% {
+      opacity: 1;
+    }
+    50.01%,
+    100% {
+      opacity: 0;
+    }
+  }
 }
 
 /* ---------------- 도입부 프리로더 (Intro) ---------------- */
@@ -83,8 +102,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #16140f;
-  color: #f4f1ea;
+  background: #1a0f0a;
+  color: #e6f0f7;
   transform: translateY(0);
   transition: transform 1s cubic-bezier(0.76, 0, 0.24, 1);
 }
@@ -114,14 +133,14 @@
 .intro__bar {
   width: 100%;
   height: 2px;
-  background: rgba(244, 241, 234, 0.15);
+  background: rgba(230, 240, 247, 0.15);
   overflow: hidden;
 }
 .intro__bar span {
   display: block;
   height: 100%;
   width: 100%;
-  background: #e0533d;
+  background: #e6f0f7;
   transform-origin: left;
   transform: scaleX(0);
   transition: transform 0.12s linear;

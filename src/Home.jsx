@@ -119,7 +119,7 @@ function Home() {
       </section>
 
       {/* ---------------- SKILL MARQUEE ---------------- */}
-      <section className="border-y border-line bg-ink py-5 text-paper">
+      <section data-nav="dark" className="border-y border-line bg-ink py-5 text-paper">
         <div className="flex select-none overflow-hidden">
           <div className="animate-marquee flex shrink-0 items-center gap-8 pr-8 text-2xl font-bold tracking-tightest md:text-3xl">
             {[...SKILLS, ...SKILLS].map((skill, i) => (
@@ -137,7 +137,7 @@ function Home() {
         <div className="grid gap-12 md:grid-cols-[1fr_2fr] md:gap-20">
           <Reveal>
             <p className="eyebrow mb-4">What I do</p>
-            <h2 className="display text-4xl md:text-5xl">
+            <h2 className="display text-4xl leading-[1.4] md:text-5xl md:leading-[1.4]">
               하는 일,
               <br />
               잘하는 일.
@@ -163,13 +163,13 @@ function Home() {
       </section>
 
       {/* ---------------- SELECTED WORK ---------------- */}
-      <section id="work" className="bg-ink scroll-mt-24 py-24 text-paper md:py-36">
+      <section id="work" data-nav="dark" className="bg-ink scroll-mt-24 py-24 text-paper md:py-36">
         <div className="container-x">
           <Reveal>
             <div className="mb-14 flex items-end justify-between">
               <div>
                 <p className="eyebrow mb-4 text-muted">Selected work</p>
-                <h2 className="display text-4xl md:text-6xl">최근 작업</h2>
+                <h2 className="display text-4xl leading-[1.4] md:text-5xl md:leading-[1.4]">최근 작업</h2>
               </div>
               <span className="hidden text-sm text-muted sm:block">
                 ({String(WORKS.length).padStart(2, "0")})
@@ -220,21 +220,6 @@ function Home() {
             ))}
           </div>
         </div>
-      </section>
-
-      {/* ---------------- CONTACT CTA ---------------- */}
-      <section className="container-x py-28 text-center md:py-40">
-        <Reveal>
-          <p className="eyebrow mb-6">Have a project?</p>
-          <h2 className="display mx-auto max-w-4xl text-5xl md:text-8xl">
-            함께 만들어요<span className="text-accent">.</span>
-          </h2>
-          <div className="mt-10">
-            <Link to="/contact" className="btn btn-solid text-base">
-              프로젝트 문의하기 →
-            </Link>
-          </div>
-        </Reveal>
       </section>
     </main>
   );

@@ -12,9 +12,15 @@ import { useEffect, useRef, useState } from "react";
  * TODO: 사진(picsum)을 본인 작업물 이미지로 교체하세요.
  */
 
-// 가운데 세리프 헤드라인 (자유롭게 수정)
+// 가운데 세리프 헤드라인
 const HEADLINE = "Detail is Everything.";
-const SUBCOPY = "Frontend Publishing · Made with care in Seoul";
+
+// 타이핑 효과로 순환할 문구들
+const TYPE_PHRASES = [
+  "Web Publishing",
+  "Cross Browsing",
+  "Web Accessibility",
+];
 
 // 흩뿌려진 사진들 (가장자리 배치). pos = 시작 위치/크기, drift = 스크롤 시 흩어질 방향
 const SCATTER = [
@@ -50,10 +56,71 @@ const HERO_IMG = "https://picsum.photos/seed/rae-hero-main/1800/1100";
 
 const clamp = (v, min = 0, max = 1) => Math.min(Math.max(v, min), max);
 
+/**
+ * 타이핑 효과 훅 — 문구를 한 글자씩 타이핑 → 잠깐 멈춤 → 지우기 → 다음 문구 반복.
+ * 비활성(intro 진행 중) 동안은 첫 문구가 완성된 상태로 보이고,
+ * 활성화되는 순간 그 첫 문구를 지우는 것부터 시작한다.
+ * @param {string[]} phrases  순환할 문구 배열
+ * @param {boolean}  active   false면 첫 문구를 정적으로 표시(인트로 중 / 모션 최소화)
+ */
+function useTypewriter(phrases, active = true) {
+  const [text, setText] = useState(phrases[0] ?? "");
+
+  useEffect(() => {
+    if (!active) {
+      setText(phrases[0] ?? "");
+      return;
+    }
+
+    // 이미 화면에 보이던 첫 문구를 '지우기'부터 시작
+    let phrase = 0;
+    let char = phrases[0].length;
+    let deleting = true;
+    let timer = 0;
+
+    const tick = () => {
+      const current = phrases[phrase];
+      char += deleting ? -1 : 1;
+      setText(current.slice(0, char));
+
+      let delay = deleting ? 45 : 90; // 지울 땐 빠르게
+      if (!deleting && char === current.length) {
+        deleting = true;
+        delay = 1400; // 다 쓴 뒤 멈춤
+      } else if (deleting && char === 0) {
+        deleting = false;
+        phrase = (phrase + 1) % phrases.length;
+        delay = 350; // 다음 문구 전 짧은 멈춤
+      }
+      timer = window.setTimeout(tick, delay);
+    };
+
+    timer = window.setTimeout(tick, 600);
+    return () => window.clearTimeout(timer);
+  }, [phrases, active]);
+
+  return text;
+}
+
 function Hero() {
   const trackRef = useRef(null);
   const [p, setP] = useState(0);
   const [reduce, setReduce] = useState(false);
+  // 인트로가 끝난 뒤에 타이핑 시작
+  const [introDone, setIntroDone] = useState(
+    () => typeof window !== "undefined" && window.__introDone === true
+  );
+  const typed = useTypewriter(TYPE_PHRASES, introDone && !reduce);
+
+  useEffect(() => {
+    if (window.__introDone) {
+      setIntroDone(true);
+      return;
+    }
+    const onDone = () => setIntroDone(true);
+    window.addEventListener("intro:done", onDone);
+    return () => window.removeEventListener("intro:done", onDone);
+  }, []);
 
   useEffect(() => {
     const prefersReduce = window.matchMedia(
@@ -93,7 +160,10 @@ function Hero() {
       <section className="relative flex min-h-screen items-center justify-center px-6 text-center">
         <div>
           <h1 className="font-serif text-3xl font-normal leading-tight tracking-tight sm:text-4xl md:text-5xl lg:text-[3.2vw]">{HEADLINE}</h1>
-          <p className="mt-5 text-sm text-muted md:text-base">{SUBCOPY}</p>
+          <p className="mt-5 text-sm text-muted md:text-base">
+            {typed}
+            <span className="type-caret" aria-hidden="true">&nbsp;</span>
+          </p>
         </div>
       </section>
     );
@@ -124,7 +194,7 @@ function Hero() {
           className="absolute right-4 top-1/2 hidden -translate-y-1/2 rotate-180 text-xs tracking-widest text-muted [writing-mode:vertical-rl] md:block"
           style={{ opacity: scatterFade }}
         >
-          Made in Seoul
+          MEERAE SHIN
         </span>
 
         {/* 흩뿌린 사진들 — 레퍼런스(Playfight)처럼 각진 모서리 + 그림자 없음 */}
@@ -154,13 +224,15 @@ function Hero() {
           <h1 className="font-serif text-3xl font-normal leading-[1.05] tracking-tight sm:text-4xl md:text-5xl lg:text-[3.2vw]">
             {HEADLINE}
           </h1>
-          <p className="mt-5 text-sm font-medium text-muted md:text-base">
-            {SUBCOPY}
+          <p className="mt-5 min-h-[1.5em] text-sm font-medium text-muted md:text-base">
+            {typed}
+            <span className="type-caret" aria-hidden="true">&nbsp;</span>
           </p>
         </div>
 
         {/* 맨 아래 중앙 사진 → 풀스크린 (레퍼런스처럼 각진 모서리, 그림자 없음) */}
         <div
+          data-nav="dark"
           className="absolute overflow-hidden bg-ink"
           style={{
             left: `${heroLeft}vw`,

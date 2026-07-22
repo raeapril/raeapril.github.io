@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
 
+// 인트로가 끝났음을 다른 컴포넌트(Hero 등)에 알림
+function signalIntroDone() {
+  window.__introDone = true;
+  window.dispatchEvent(new Event("intro:done"));
+}
+
 /**
  * 도입부 프리로더: 0 → 100 숫자 카운팅 후 위로 슬라이드되며 사라짐.
  * (Playfight 스타일 인트로) 모션 최소화 선호 시 즉시 스킵.
@@ -13,6 +19,7 @@ function Intro() {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
       setHidden(true);
+      signalIntroDone();
       return;
     }
 
@@ -29,6 +36,7 @@ function Intro() {
         timer = setTimeout(() => {
           setHidden(true);
           document.body.style.overflow = "";
+          signalIntroDone();
         }, 1500); // 슬라이드 아웃 후 제거
         return;
       }
@@ -48,7 +56,7 @@ function Intro() {
   return (
     <div className={`intro ${leaving ? "intro--leaving" : ""}`} aria-hidden="true">
       <div className="intro__inner">
-        <span className="intro__label">RAE APRIL — Loading</span>
+        <span className="intro__label">Portfolio — Loading</span>
         <span className="intro__count">{String(count).padStart(3, "0")}</span>
         <div className="intro__bar">
           <span style={{ transform: `scaleX(${count / 100})` }} />
