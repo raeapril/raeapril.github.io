@@ -43,22 +43,12 @@ function Nav() {
         </Link>
 
         <div className="flex items-center gap-6 text-sm font-medium md:gap-8">
-          <a href="/#work" className="hidden transition-colors hover:text-accent sm:inline">
-            Work
-          </a>
           <a href="/#about" className="hidden transition-colors hover:text-accent sm:inline">
             About
           </a>
-          <Link
-            to="/contact"
-            className={`rounded-full border px-4 py-1.5 transition-all duration-300 ease-smooth ${
-              onDark
-                ? "border-paper hover:bg-paper hover:text-ink"
-                : "border-ink hover:bg-ink hover:text-paper"
-            }`}
-          >
-            Contact
-          </Link>
+          <a href="/#work" className="hidden transition-colors hover:text-accent sm:inline">
+            Work
+          </a>
         </div>
       </nav>
     </header>

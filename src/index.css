@@ -209,54 +209,6 @@
   opacity: 1;
 }
 
-/* ---------------- 최근 작업 배경 웨이브 ---------------- */
-.work-waves {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-.wave-track {
-  position: absolute;
-  inset: 0;
-  width: 200%;
-  height: 100%;
-  will-change: transform;
-}
-.wave-track svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.wave-track path {
-  fill: none;
-  vector-effect: non-scaling-stroke;
-}
-.wave-a {
-  animation: wave-flow 18s linear infinite;
-}
-.wave-b {
-  animation: wave-flow 27s linear infinite;
-}
-.wave-c {
-  animation: wave-flow 36s linear infinite;
-}
-@keyframes wave-flow {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .wave-a,
-  .wave-b,
-  .wave-c {
-    animation: none;
-  }
-}
-
 /* ---------------- 라우트 전환 커튼 ---------------- */
 .curtain {
   position: fixed;

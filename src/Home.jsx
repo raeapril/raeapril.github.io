@@ -1,27 +1,11 @@
 import { Link } from "react-router-dom";
 import Reveal from "./components/Reveal";
-import ScrollScale from "./components/ScrollScale";
 import Hero from "./components/Hero";
-import TiltCard from "./components/TiltCard";
-import WorkWaves from "./components/WorkWaves";
 
 /* ------------------------------------------------------------------ */
 /*  데이터: 본인 내용으로 자유롭게 교체하세요.                          */
 /* ------------------------------------------------------------------ */
 const EMAIL = "meerae.shin@gmail.com";
-
-const SKILLS = [
-  "HTML",
-  "CSS / SCSS",
-  "JavaScript",
-  "React",
-  "Tailwind",
-  "Accessibility",
-  "Responsive",
-  "Web Animation",
-  "Design System",
-  "Git",
-];
 
 const SERVICES = [
   {
@@ -56,53 +40,6 @@ const SERVICES = [
   },
 ];
 
-// TODO: 이미지(image)를 본인 작업물 스크린샷으로 교체하세요.
-// 지금은 picsum.photos placeholder 라 스크롤 줌 효과를 바로 볼 수 있습니다.
-const WORKS = [
-  {
-    title: "Brand Landing",
-    tags: ["Publishing", "Animation"],
-    year: "2026",
-    href: "#",
-    image: "https://picsum.photos/seed/raework-brand/900/680",
-  },
-  {
-    title: "Commerce UI",
-    tags: ["React", "Design System"],
-    year: "2025",
-    href: "#",
-    image: "https://picsum.photos/seed/raework-commerce/900/680",
-  },
-  {
-    title: "Editorial Site",
-    tags: ["Responsive", "Accessibility"],
-    year: "2025",
-    href: "#",
-    image: "https://picsum.photos/seed/raework-editorial/900/680",
-  },
-  {
-    title: "Interactive Promo",
-    tags: ["Motion", "JavaScript"],
-    year: "2024",
-    href: "#",
-    image: "https://picsum.photos/seed/raework-promo/900/680",
-  },
-  {
-    title: "Portfolio Site",
-    tags: ["Publishing", "Motion"],
-    year: "2024",
-    href: "#",
-    image: "https://picsum.photos/seed/raework-portfolio/900/680",
-  },
-  {
-    title: "Campaign Page",
-    tags: ["Responsive", "Interaction"],
-    year: "2023",
-    href: "#",
-    image: "https://picsum.photos/seed/raework-campaign/900/680",
-  },
-];
-
 /* ------------------------------------------------------------------ */
 
 function Home() {
@@ -111,49 +48,11 @@ function Home() {
       {/* ---------------- HERO (스크롤 고정 + 방사형 사진) ---------------- */}
       <Hero />
 
-      {/* ---------------- INTRO 카피 ---------------- */}
-      <section className="container-x py-20 md:py-28">
-        <Reveal>
-          <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-            <p className="max-w-xl text-lg leading-relaxed leading-[1.3] text-muted md:text-2xl md:leading-[1.3]">
-              픽셀 하나까지 신경 쓰는 퍼블리셔.
-              <br />
-              접근성과 인터랙션을 함께 고민하며,
-              <br />
-              디자인을 깔끔한 코드로 옮깁니다.
-            </p>
-
-            <div className="flex flex-wrap gap-3">
-              <a href="#work" className="btn btn-solid">
-                작업 보기
-              </a>
-              <a href="#work" className="btn btn-solid">
-                작업 보기
-              </a>
-            </div>
-          </div>
-        </Reveal>
-      </section>
-
-      {/* ---------------- SKILL MARQUEE ---------------- */}
-      <section data-nav="dark" className="border-y border-line bg-ink py-5 text-paper">
-        <div className="flex select-none overflow-hidden">
-          <div className="animate-marquee flex shrink-0 items-center gap-8 pr-8 text-2xl font-bold tracking-tightest md:text-3xl">
-            {[...SKILLS, ...SKILLS].map((skill, i) => (
-              <span key={i} className="flex items-center gap-8">
-                {skill}
-                <span className="text-accent">✦</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ---------------- WHAT I DO ---------------- */}
+      {/* ---------------- ABOUT ---------------- */}
       <section id="about" className="container-x scroll-mt-24 py-24 md:py-36">
         <div className="grid gap-12 md:grid-cols-[1fr_2fr] md:gap-20">
           <Reveal>
-            <p className="eyebrow mb-4">What I do</p>
+            <p className="eyebrow mb-4">ABOUT</p>
             <h2 className="display text-4xl leading-[1.2] md:text-5xl md:leading-[1.2]">
               하는 일,
               <br />
@@ -179,71 +78,15 @@ function Home() {
         </div>
       </section>
 
-      {/* ---------------- SELECTED WORK ---------------- */}
-      <section
-        id="work"
-        data-nav="dark"
-        className="relative overflow-hidden bg-ink scroll-mt-24 py-24 text-paper md:py-36"
-      >
-        <WorkWaves />
-        <div className="container-x relative z-10">
+      {/* ---------------- WORK ---------------- */}
+      <section id="work" className="container-x scroll-mt-24 py-24 md:py-36">
+        <div className="grid gap-12 md:grid-cols-[1fr_2fr] md:gap-20">
           <Reveal>
-            <div className="mb-14 flex items-end justify-between">
-              <div>
-                <p className="eyebrow mb-4 text-muted">Selected work</p>
-                <h2 className="display text-4xl leading-[1.2] md:text-5xl md:leading-[1.2]">최근 작업</h2>
-              </div>
-              <span className="hidden text-sm text-muted sm:block">
-                ({String(WORKS.length).padStart(2, "0")})
-              </span>
-            </div>
+            <p className="eyebrow mb-4">WORK</p>
+            <h2 className="display text-4xl leading-[1.2] md:text-5xl md:leading-[1.2]">
+              참여한 작업
+            </h2>
           </Reveal>
-
-          <div className="grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-            {WORKS.map((w, i) => (
-              <Reveal key={w.title} delay={(i % 3) * 120}>
-                <a href={w.href} className="group block">
-                  {/* 프레임은 고정, 안의 이미지만 틸트 */}
-                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-paper/5">
-                    <TiltCard className="h-full w-full">
-                      <ScrollScale className="h-full w-full" from={1.05} to={1.3}>
-                        <img
-                          src={w.image}
-                          alt={w.title}
-                          loading="lazy"
-                          className="h-full w-full object-cover"
-                        />
-                      </ScrollScale>
-                    </TiltCard>
-                    {/* 호버 시 살짝 어두워지는 오버레이 */}
-                    <div className="pointer-events-none absolute inset-0 bg-ink/20 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                    <span className="pointer-events-none absolute left-5 top-4 display text-5xl text-paper/30 mix-blend-overlay md:text-6xl">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                  </div>
-
-                  <div className="mt-5 flex items-start justify-between">
-                    <div>
-                      <h3 className="text-2xl font-bold transition-colors group-hover:text-accent">
-                        {w.title}
-                      </h3>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {w.tags.map((t) => (
-                          <span
-                            key={t}
-                            className="rounded-full border border-paper/20 px-3 py-1 text-xs text-paper/70"
-                          >
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <span className="text-sm text-muted">{w.year}</span>
-                  </div>
-                </a>
-              </Reveal>
-            ))}
-          </div>
         </div>
       </section>
     </main>

@@ -22,30 +22,36 @@ const TYPE_PHRASES = [
 ];
 
 // 흩뿌려진 사진들 (가장자리 배치). pos = 시작 위치/크기, drift = 스크롤 시 흩어질 방향
+// mobile = 모바일(≤768px)에서 덮어쓸 위치/크기. width·height만 바꿔도 되고 left·top까지 조정해도 됨.
 const SCATTER = [
   {
     src: "https://picsum.photos/seed/rae-a/600/800",
     pos: { left: "13%", top: "7%", width: "14vw", height: "33vh" },
+    mobile: { left: "6%", top: "6%", width: "34vw", height: "22vh" },
     drift: { x: -10, y: -6 },
   },
   {
     src: "https://picsum.photos/seed/rae-b/700/500",
     pos: { left: "8%", top: "48%", width: "16vw", height: "20vh" },
+    mobile: { left: "5%", top: "44%", width: "36vw", height: "18vh" },
     drift: { x: -12, y: 4 },
   },
   {
     src: "https://picsum.photos/seed/rae-c/600/450",
     pos: { left: "16%", top: "73%", width: "11vw", height: "15vh" },
+    mobile: { left: "8%", top: "74%", width: "30vw", height: "14vh" },
     drift: { x: -8, y: 8 },
   },
   {
     src: "https://picsum.photos/seed/rae-d/900/600",
-    pos: { left: "62%", top: "9%", width: "25vw", height: "26vh" },
+    pos: { left: "62%", top: "15%", width: "25vw", height: "26vh" },
+    mobile: { left: "58%", top: "8%", width: "38vw", height: "20vh" },
     drift: { x: 12, y: -6 },
   },
   {
     src: "https://picsum.photos/seed/rae-e/700/900",
-    pos: { left: "71%", top: "42%", width: "15vw", height: "25vh" },
+    pos: { left: "71%", top: "50%", width: "15vw", height: "25vh" },
+    mobile: { left: "60%", top: "46%", width: "34vw", height: "22vh" },
     drift: { x: 12, y: 5 },
   },
 ];
@@ -105,6 +111,7 @@ function Hero() {
   const trackRef = useRef(null);
   const [p, setP] = useState(0);
   const [reduce, setReduce] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   // 인트로가 끝난 뒤에 타이핑 시작
   const [introDone, setIntroDone] = useState(
     () => typeof window !== "undefined" && window.__introDone === true
@@ -119,6 +126,15 @@ function Hero() {
     const onDone = () => setIntroDone(true);
     window.addEventListener("intro:done", onDone);
     return () => window.removeEventListener("intro:done", onDone);
+  }, []);
+
+  // 모바일 여부 감지 (≤768px) — SCATTER/히어로 시작 크기를 모바일 값으로 전환
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const onChange = () => setIsMobile(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
   }, []);
 
   useEffect(() => {
@@ -168,9 +184,11 @@ function Hero() {
     );
   }
 
-  // 진행도 기반 파생값
-  const heroW = 26 + p * 74; // 26vw → 100vw
-  const heroH = 34 + p * 66; // 34vh → 100vh
+  // 진행도 기반 파생값 — 시작 크기는 모바일에서 더 크게(가로 화면 대비 잘 보이도록)
+  const heroStartW = isMobile ? 62 : 26; // 모바일 시작 넓이(vw)
+  const heroStartH = isMobile ? 30 : 34; // 모바일 시작 높이(vh)
+  const heroW = heroStartW + p * (100 - heroStartW); // → 100vw
+  const heroH = heroStartH + p * (100 - heroStartH); // → 100vh
   const heroLeft = (100 - heroW) / 2; // 항상 가로 중앙
   const heroTop = 62 * (1 - p); // 62vh → 0
 
@@ -196,7 +214,7 @@ function Hero() {
           MEERAE SHIN
         </span>
 
-        {/* 흩뿌린 사진들 — 레퍼런스(Playfight)처럼 각진 모서리 + 그림자 없음 */}
+        {/* 흩뿌린 사진들 */}
         {SCATTER.map((img, i) => (
           <img
             key={i}
@@ -205,7 +223,7 @@ function Hero() {
             loading="lazy"
             className="absolute object-cover"
             style={{
-              ...img.pos,
+              ...(isMobile && img.mobile ? img.mobile : img.pos),
               transform: `translate(${img.drift.x * p}vw, ${
                 img.drift.y * p
               }vh) scale(${1 - p * 0.1})`,
@@ -220,7 +238,10 @@ function Hero() {
           className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center"
           style={{ opacity: centerOpacity }}
         >
-          <h1 className="font-serif text-3xl font-normal leading-[1.05] tracking-tight sm:text-4xl md:text-5xl lg:text-[3.2vw]">
+          <h1
+            className="font-serif text-3xl font-normal leading-[1.05] tracking-tight sm:text-4xl md:text-5xl lg:text-[3.2vw]"
+            style={{ mixBlendMode: "difference" }}
+          >
             {HEADLINE.split("").map((ch, i) =>
               ch === " " ? (
                 <span key={i} style={{ display: "inline-block", width: "0.28em" }} />
