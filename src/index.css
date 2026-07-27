@@ -48,26 +48,42 @@
 }
 
 
-/* ---------------- 비 내리는 반원형(아치) 창문 ---------------- */
-.rain-window {
+/* ---------------- 비 내리는 아치 창문 → 이미지 전환 후 넓이 확장 ----------------
+   단계별 진행도: --round(모서리) --frame(창틀) --size(넓이 300→600). */
+.hero-window {
+  --start-w: min(60vw, 300px);
+  --end-w: min(calc(100vw - 3rem), 630px);
   position: relative;
-  width: 60vw;
-  max-width: 300px;
-  aspect-ratio: 26 / 36;
-  /* 위쪽만 반원(아치) — 세로 반지름 36.1% 로 두면 aspect-ratio 상 정확한 반원 */
-  border-radius: 50% 50% 0 0 / 36.1% 36.1% 0 0;
+  box-sizing: border-box;
   overflow: hidden;
-  border: 0.5rem solid #E5D2D1;
+  /* 마스크만 300px → 600px 로 넓어짐(높이 고정). 이미지는 가만히 있고 옆 영역이 드러남 */
+  width: calc(var(--start-w) + (var(--end-w) - var(--start-w)) * var(--size));
+  height: calc(var(--start-w) * 36 / 26);
+  border-style: solid;
+  border-color: #e5d2d1;
+  /* 창틀은 --frame, 둥근 모서리는 --round 로 각각 단계별로 사라짐 */
+  border-width: calc(0.5rem * var(--frame));
+  border-radius: calc(50% * var(--round)) calc(50% * var(--round)) 0 0 /
+    calc(36.1% * var(--round)) calc(36.1% * var(--round)) 0 0;
 }
-/* 유리 너머 배경 — 꽃 이미지 */
-.rain-window__bg {
+/* 창 안의 꽃 이미지 — 폭 고정(=최대 넓이) + 중앙 고정. 마스크가 넓어지면 옆이 드러남 */
+.hero-window__img {
   position: absolute;
-  inset: 0;
-  width: 100%;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--end-w);
   height: 100%;
   object-fit: cover;
 }
-.rain-window__glass {
+/* 흰 뿌연 오버레이(간유리) — opacity 는 인라인으로 스크롤 단계에 따라 조절 */
+.hero-window__haze {
+  position: absolute;
+  inset: 0;
+  background: #e7e0d3;
+  pointer-events: none;
+}
+.hero-window__glass {
   position: absolute;
   inset: 0;
 }
