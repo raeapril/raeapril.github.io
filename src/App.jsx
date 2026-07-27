@@ -6,7 +6,6 @@ import ScrollToTop from "./components/ScrollToTop";
 import Intro from "./components/Intro";
 import RouteTransition from "./components/RouteTransition";
 import Home from "./Home";
-import Contact from "./Contact";
 
 function App() {
   return (
@@ -17,7 +16,6 @@ function App() {
       <RouteTransition>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/contact" element={<Contact />} />
         </Routes>
       </RouteTransition>
       <Footer />
