@@ -116,6 +116,43 @@
   }
 }
 
+/* ---------------- 메인 진입 스크롤 안내 큐 ----------------
+   'scroll' 문구 아래 얇은 세로선을 따라 짧은 조각이 아래로 흘러내린다. */
+.scroll-cue {
+  transition: opacity 0.4s ease;
+}
+.scroll-cue__line {
+  position: relative;
+  display: block;
+  width: 1px;
+  height: 44px;
+  overflow: hidden;
+  background: rgba(13, 52, 58, 0.15);
+}
+.scroll-cue__line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 45%;
+  background: currentColor;
+  animation: scroll-cue-run 1.7s cubic-bezier(0.76, 0, 0.24, 1) infinite;
+}
+@keyframes scroll-cue-run {
+  0% {
+    transform: translateY(-110%);
+  }
+  100% {
+    transform: translateY(240%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue__line::after {
+    animation: none;
+  }
+}
+
 /* ---------------- 도입부 프리로더 (Intro) ----------------
    분리→합체 (letsplayfight 방식):
    워드마크가 좌/우 두 조각으로 벌어진 채 아래에서 떠오르고, 그 사이에서
@@ -159,7 +196,7 @@
 .intro--plant .intro__mark,
 .intro--reveal .intro__mark {
   color: #E5D2D1;
-  opacity: 0.8;
+  /* opacity: 0.8; */
 }
 /* 글자 단위 — reveal 때 한 글자씩 위로 또로로록 사라짐 */
 .intro__char {

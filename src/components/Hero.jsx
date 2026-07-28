@@ -9,6 +9,59 @@ import flowerImg from "../assets/flower.jpg";
 const rand = (min, max) => Math.random() * (max - min) + min;
 const clamp = (v, min = 0, max = 1) => Math.min(Math.max(v, min), max);
 
+/**
+ * 글자를 한 자씩 '도로록' 굴려서 드러내는 텍스트.
+ * progress(0~1)에 따라 각 글자가 클리핑된 박스 안에서 위(below)/아래(above)로 밀려 올라온다.
+ * from="below" → 아래에서 위로, from="above" → 위에서 아래로.
+ */
+function RollText({ text, progress, from = "below", breakMobile = false, className = "", style }) {
+  const chars = [...text];
+  const n = chars.length;
+  const charDur = 0.55; // 글자 하나가 진행되는 데 쓰는 progress 비율
+  const stagger = (1 - charDur) / Math.max(n - 1, 1);
+  const sign = from === "above" ? -1 : 1;
+  return (
+    <span className={className} style={style} aria-label={text} role="text">
+      {chars.map((c, i) => {
+        const local = clamp((progress - i * stagger) / charDur);
+        const isSpace = c === " ";
+        // 1200px 이하에서 공백을 줄바꿈으로: 좁은 화면은 <br>, 1200px 초과는 공백
+        if (isSpace && breakMobile) {
+          return (
+            <span key={i} aria-hidden="true">
+              <br className="min-[1200px]:hidden" />
+              <span
+                className="hidden min-[1200px]:inline"
+                style={{ whiteSpace: "pre" }}
+              >
+                {" "}
+              </span>
+            </span>
+          );
+        }
+        return (
+          <span
+            key={i}
+            aria-hidden="true"
+            style={{ display: "inline-block", overflow: "hidden", verticalAlign: "top" }}
+          >
+            <span
+              style={{
+                display: "inline-block",
+                transform: `translateY(${sign * (1 - local) * 100}%)`,
+                opacity: clamp(local * 1.4),
+                whiteSpace: "pre",
+              }}
+            >
+              {isSpace ? " " : c}
+            </span>
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
 function Hero() {
   const trackRef = useRef(null);
   const [p, setP] = useState(0);
@@ -51,16 +104,20 @@ function Hero() {
     };
   }, []);
 
-  // 구간별 순차 진행: ① 원형→네모 → ② 창틀 → ③ 비 → ④ 뿌연 프레임 → ⑤ 넓이 확장
+  // 구간별 순차 진행: ① 원형→네모 → ② 창틀 → ③ 비 → ④ 뿌연 프레임 → ⑤ 넓이 확장 → ⑥ 문구
   const range = (a, b) => clamp((p - a) / (b - a));
-  const round = 1 - range(0, 0.12); // 1→0: 위 둥근 모서리가 네모로
-  const frame = 1 - range(0.12, 0.24); // 1→0: 창틀 사라짐
-  const rain = 1 - range(0.24, 0.36); // 1→0: 비 사라짐
-  const haze = 1 - range(0.36, 0.52); // 1→0: 흰 뿌연 오버레이 사라짐
-  const size = range(0.52, 1); // 0→1: 마스크 넓이 300px → 630px (이미지는 고정)
+  const round = 1 - range(0, 0.08); // 1→0: 위 둥근 모서리가 네모로
+  const frame = 1 - range(0.08, 0.16); // 1→0: 창틀 사라짐
+  const rain = 1 - range(0.16, 0.26); // 1→0: 비 사라짐
+  const haze = 1 - range(0.26, 0.4); // 1→0: 흰 뿌연 오버레이 사라짐
+  const size = range(0.4, 0.56); // 0→1: 마스크 넓이 300px → 630px (이미지는 고정)
+  // 확장이 끝난 뒤 문구가 순차로 도로록 등장
+  const webText = range(0.6, 0.78); // WEB PUBLISHING — 좌측 하단
+  const meeraeText = range(0.82, 0.98); // MEERAE — 우측 상단
+  const scrollHint = 1 - range(0, 0.06); // 메인 진입 안내 — 스크롤 시작하면 사라짐
 
   return (
-    <section ref={trackRef} className="relative h-[220vh]">
+    <section ref={trackRef} className="relative h-[420vh]">
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden">
         {/* 양옆 세로 텍스트 — 확장되며 사라짐 */}
         <span
@@ -76,29 +133,57 @@ function Hero() {
           MEERAE SHIN
         </span>
 
-        {/* 아치 창문 → 전체 배경 */}
-        <div
-          className="hero-window"
-          style={{ "--size": size, "--frame": frame, "--round": round }}
-        >
-          <img src={flowerImg} alt="" className="hero-window__img" />
-          {/* 흰 뿌연 오버레이(간유리 느낌) */}
-          <div className="hero-window__haze" style={{ opacity: 0.4 * haze }} />
-          <div className="hero-window__glass" style={{ opacity: rain }}>
-            {drops.map((d, i) => (
-              <span
-                key={i}
-                className="rd-drop"
-                style={{
-                  left: `${d.left}%`,
-                  height: `${d.height}px`,
-                  opacity: d.opacity,
-                  animationDuration: `${d.duration}s`,
-                  animationDelay: `${d.delay}s`,
-                }}
-              />
-            ))}
+        {/* 아치 창문 → 전체 배경 (+ 확장 완료 후 도로록 등장하는 문구) */}
+        <div className="relative">
+          <div
+            className="hero-window"
+            style={{ "--size": size, "--frame": frame, "--round": round }}
+          >
+            <img src={flowerImg} alt="" className="hero-window__img" />
+            {/* 흰 뿌연 오버레이(간유리 느낌) */}
+            <div className="hero-window__haze" style={{ opacity: 0.4 * haze }} />
+            <div className="hero-window__glass" style={{ opacity: rain }}>
+              {drops.map((d, i) => (
+                <span
+                  key={i}
+                  className="rd-drop"
+                  style={{
+                    left: `${d.left}%`,
+                    height: `${d.height}px`,
+                    opacity: d.opacity,
+                    animationDuration: `${d.duration}s`,
+                    animationDelay: `${d.delay}s`,
+                  }}
+                />
+              ))}
+            </div>
           </div>
+
+          {/* 이미지 좌측 하단 가장자리에 반쯤 걸침 */}
+          <RollText
+            text="WEB PUBLISHER"
+            progress={webText}
+            from="below"
+            breakMobile
+            className="display pointer-events-none absolute bottom-[7%] left-0 z-20 -translate-x-[6%] whitespace-nowrap text-4xl text-accent sm:text-5xl md:text-6xl min-[1200px]:bottom-[12%] min-[1200px]:-translate-x-1/2"
+          />
+
+          {/* 이미지 우측 상단 가장자리에 반쯤 걸침 */}
+          <RollText
+            text="PORTFOLIO"
+            progress={meeraeText}
+            from="above"
+            className="display pointer-events-none absolute right-0 top-[-7%] z-20 translate-x-[6%] whitespace-nowrap text-4xl text-accent sm:text-5xl md:text-6xl min-[1200px]:top-[12%] min-[1200px]:translate-x-1/2"
+          />
+
+          {/* 메인 진입 안내 — 창 모양 아래 작은 scroll 큐 */}
+          <span
+            className="scroll-cue pointer-events-none absolute left-1/2 top-full z-20 mt-8 flex -translate-x-1/2 flex-col items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-muted"
+            style={{ opacity: scrollHint }}
+          >
+            scroll
+            <span className="scroll-cue__line" />
+          </span>
         </div>
       </div>
     </section>
