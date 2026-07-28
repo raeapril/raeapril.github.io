@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import flowerImg from "../assets/flower.jpg";
 
 /**
@@ -9,12 +9,25 @@ import flowerImg from "../assets/flower.jpg";
 const rand = (min, max) => Math.random() * (max - min) + min;
 const clamp = (v, min = 0, max = 1) => Math.min(Math.max(v, min), max);
 
+const CURRENT_YEAR = new Date().getFullYear();
+
+// 한 글자를 감싸는 클리핑 박스 — 정적이므로 상수로 (글자마다 재생성 방지)
+const CHAR_CLIP_STYLE = {
+  display: "inline-block",
+  overflow: "hidden",
+  verticalAlign: "top",
+};
+
+// 두 도로록 문구가 공유하는 기본 클래스 (위치/겹침만 각 호출부에서 덧붙임)
+const HERO_TEXT_BASE =
+  "display pointer-events-none absolute z-20 whitespace-nowrap text-4xl text-accent sm:text-5xl md:text-6xl";
+
 /**
  * 글자를 한 자씩 '도로록' 굴려서 드러내는 텍스트.
  * progress(0~1)에 따라 각 글자가 클리핑된 박스 안에서 위(below)/아래(above)로 밀려 올라온다.
  * from="below" → 아래에서 위로, from="above" → 위에서 아래로.
  */
-function RollText({ text, progress, from = "below", breakMobile = false, className = "", style }) {
+const RollText = memo(function RollText({ text, progress, from = "below", breakMobile = false, className = "", style }) {
   const chars = [...text];
   const n = chars.length;
   const charDur = 0.55; // 글자 하나가 진행되는 데 쓰는 progress 비율
@@ -43,7 +56,7 @@ function RollText({ text, progress, from = "below", breakMobile = false, classNa
           <span
             key={i}
             aria-hidden="true"
-            style={{ display: "inline-block", overflow: "hidden", verticalAlign: "top" }}
+            style={CHAR_CLIP_STYLE}
           >
             <span
               style={{
@@ -60,22 +73,28 @@ function RollText({ text, progress, from = "below", breakMobile = false, classNa
       })}
     </span>
   );
-}
+});
 
 function Hero() {
   const trackRef = useRef(null);
   const [p, setP] = useState(0);
 
-  // 빗방울 — 한 번만 생성
-  const drops = useMemo(
+  // 빗방울 — 한 번만 생성 후 렌더 결과까지 메모 (스크롤 프레임마다 재생성 방지)
+  const rainDrops = useMemo(
     () =>
-      Array.from({ length: 120 }, () => ({
-        left: rand(0, 100),
-        height: rand(26, 54),
-        duration: rand(0.5, 0.95),
-        delay: -rand(0, 1.2),
-        opacity: rand(0.3, 0.7),
-      })),
+      Array.from({ length: 120 }, (_, i) => (
+        <span
+          key={i}
+          className="rd-drop"
+          style={{
+            left: `${rand(0, 100)}%`,
+            height: `${rand(26, 54)}px`,
+            opacity: rand(0.3, 0.7),
+            animationDuration: `${rand(0.5, 0.95)}s`,
+            animationDelay: `${-rand(0, 1.2)}s`,
+          }}
+        />
+      )),
     []
   );
 
@@ -124,7 +143,7 @@ function Hero() {
           className="absolute left-4 top-1/2 z-10 hidden -translate-y-1/2 text-xs tracking-widest text-muted [writing-mode:vertical-rl] md:block"
           style={{ opacity: rain }}
         >
-          © {new Date().getFullYear()}
+          © {CURRENT_YEAR}
         </span>
         <span
           className="absolute right-4 top-1/2 z-10 hidden -translate-y-1/2 rotate-180 text-xs tracking-widest text-muted [writing-mode:vertical-rl] md:block"
@@ -143,19 +162,7 @@ function Hero() {
             {/* 흰 뿌연 오버레이(간유리 느낌) */}
             <div className="hero-window__haze" style={{ opacity: 0.4 * haze }} />
             <div className="hero-window__glass" style={{ opacity: rain }}>
-              {drops.map((d, i) => (
-                <span
-                  key={i}
-                  className="rd-drop"
-                  style={{
-                    left: `${d.left}%`,
-                    height: `${d.height}px`,
-                    opacity: d.opacity,
-                    animationDuration: `${d.duration}s`,
-                    animationDelay: `${d.delay}s`,
-                  }}
-                />
-              ))}
+              {rainDrops}
             </div>
           </div>
 
@@ -165,7 +172,7 @@ function Hero() {
             progress={webText}
             from="below"
             breakMobile
-            className="display pointer-events-none absolute bottom-[7%] left-0 z-20 -translate-x-[6%] whitespace-nowrap text-4xl text-accent sm:text-5xl md:text-6xl min-[1200px]:bottom-[12%] min-[1200px]:-translate-x-1/2"
+            className={`${HERO_TEXT_BASE} bottom-[7%] left-0 -translate-x-[6%] min-[1200px]:bottom-[12%] min-[1200px]:-translate-x-1/2`}
           />
 
           {/* 이미지 우측 상단 가장자리에 반쯤 걸침 */}
@@ -173,7 +180,7 @@ function Hero() {
             text="PORTFOLIO"
             progress={meeraeText}
             from="above"
-            className="display pointer-events-none absolute right-0 top-[-7%] z-20 translate-x-[6%] whitespace-nowrap text-4xl text-accent sm:text-5xl md:text-6xl min-[1200px]:top-[12%] min-[1200px]:translate-x-1/2"
+            className={`${HERO_TEXT_BASE} right-0 top-[-7%] translate-x-[6%] min-[1200px]:top-[12%] min-[1200px]:translate-x-1/2`}
           />
 
           {/* 메인 진입 안내 — 창 모양 아래 작은 scroll 큐 */}

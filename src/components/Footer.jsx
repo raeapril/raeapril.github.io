@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 const EMAIL = "meerae.shin@gmail.com";
+/*const EMAIL = "MEERAE.SHIN@GMAIL.COM";*/
 
 function Footer() {
   return (
@@ -9,9 +10,14 @@ function Footer() {
         <div className="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr]">
             <a
               href={`mailto:${EMAIL}`}
-              className="display block text-3xl transition-colors hover:text-accent md:text-4xl"
+              className="display block text-2xl leading-none tracking-wide transition-colors hover:text-accent md:text-3xl"
             >
-              {EMAIL}
+              {EMAIL.split(".").map((part, i) => (
+                <span key={i}>
+                  {i > 0 && <span className="text-accent">.</span>}
+                  {part}
+                </span>
+              ))}
             </a>
         </div>
 
