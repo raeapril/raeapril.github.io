@@ -16,6 +16,53 @@ function Home() {
               <br />
               잘하는 일<span className="text-accent">.</span>
             </h2>
+            about  <br />
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------- SKILLS ---------------- */}
+      <section id="skills" className="container-x scroll-mt-24 py-24 md:py-36">
+        <div className="grid gap-12 md:grid-cols-[1fr_2fr] md:gap-20">
+          <div>
+            <p className="eyebrow mb-3">SKILLS</p>
+            <h2 className="display text-3xl leading-[1.2] md:text-4xl md:leading-[1.2]">
+              다룰 수 있는 <br />
+              기술<span className="text-accent">.</span>
+            </h2>
+            about  <br />
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
           </div>
         </div>
       </section>
@@ -30,6 +77,23 @@ function Home() {
               <br />
               작업<span className="text-accent">.</span>
             </h2>
+            about  <br />
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
+            about  <br /> 
           </div>
         </div>
       </section>

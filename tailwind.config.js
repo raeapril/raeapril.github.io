@@ -1,5 +1,9 @@
 export default {
   content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
+  // 터치 기기에서 탭 후 hover 색이 남는 문제 방지 — hover는 실제 hover 지원 기기에서만
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   theme: {
     extend: {
       colors: {

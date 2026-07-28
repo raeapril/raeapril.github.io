@@ -1,6 +1,44 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+const NAV_ITEMS = [
+  { id: "about", label: "About" },
+  { id: "skills", label: "Skills" },
+  { id: "work", label: "Work" },
+];
+
 function Nav() {
+  // 현재 화면 중앙에 들어온 섹션 id (스크롤·클릭 이동 모두 반영)
+  const [active, setActive] = useState("");
+
+  useEffect(() => {
+    const sections = NAV_ITEMS.map((item) =>
+      document.getElementById(item.id)
+    ).filter(Boolean);
+    if (!sections.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActive(entry.target.id);
+          } else if (
+            entry.target.id === NAV_ITEMS[0].id &&
+            entry.boundingClientRect.top > 0
+          ) {
+            // 첫 섹션이 밴드 아래(=히어로 구간)로 내려가면 활성 해제
+            setActive("");
+          }
+        });
+      },
+      // 뷰포트 중앙의 얇은 밴드에 들어온 섹션만 활성
+      { rootMargin: "-45% 0px -45% 0px" }
+    );
+
+    sections.forEach((s) => observer.observe(s));
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 text-ink">
       <nav className="container-x flex h-16 items-center justify-between md:h-20">
@@ -9,12 +47,18 @@ function Nav() {
         </Link>
 
         <div className="flex items-center gap-6 text-sm font-medium md:gap-8">
-          <a href="/#about" className="transition-colors hover:text-accent">
-            About
-          </a>
-          <a href="/#work" className="transition-colors hover:text-accent">
-            Work
-          </a>
+          {NAV_ITEMS.map((item) => (
+            <a
+              key={item.id}
+              href={`/#${item.id}`}
+              aria-current={active === item.id ? "true" : undefined}
+              className={`transition-colors hover:text-accent ${
+                active === item.id ? "text-accent" : ""
+              }`}
+            >
+              {item.label}
+            </a>
+          ))}
         </div>
       </nav>
     </header>
