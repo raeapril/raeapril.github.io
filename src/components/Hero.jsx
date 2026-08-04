@@ -1,5 +1,7 @@
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useMemo, useRef } from "react";
 import flowerImg from "../assets/flower.jpg";
+import { clamp } from "../utils/math";
+import { useScrollProgress } from "../hooks/useScrollProgress";
 
 /**
  * 히어로 — 정중앙 '비 내리는 아치 창문'이 스크롤에 따라 전체 화면으로 확장된다.
@@ -7,7 +9,6 @@ import flowerImg from "../assets/flower.jpg";
  * bg_flower.png(전체 꽃 이미지)로 전환되어 배경 가득 펼쳐진다.
  */
 const rand = (min, max) => Math.random() * (max - min) + min;
-const clamp = (v, min = 0, max = 1) => Math.min(Math.max(v, min), max);
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -77,7 +78,7 @@ const RollText = memo(function RollText({ text, progress, from = "below", breakM
 
 function Hero() {
   const trackRef = useRef(null);
-  const [p, setP] = useState(0);
+  const p = useScrollProgress(trackRef);
 
   // 빗방울 — 한 번만 생성 후 렌더 결과까지 메모 (스크롤 프레임마다 재생성 방지)
   const rainDrops = useMemo(
@@ -97,31 +98,6 @@ function Hero() {
       )),
     []
   );
-
-  // 스크롤 진행도 계산
-  useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      const rect = el.getBoundingClientRect();
-      const total = el.offsetHeight - window.innerHeight;
-      const scrolled = clamp(-rect.top, 0, total);
-      setP(total > 0 ? scrolled / total : 0);
-    };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, []);
 
   // 구간별 순차 진행: ① 원형→네모 → ② 창틀 → ③ 비 → ④ 뿌연 프레임 → ⑤ 넓이 확장 → ⑥ 문구
   const range = (a, b) => clamp((p - a) / (b - a));

@@ -3,10 +3,7 @@
 @tailwind utilities;
 
 @layer base {
-  html {
-    scroll-behavior: smooth;
-  }
-
+  /* 스무스 스크롤은 Lenis 가 담당 (useSmoothScroll). 네이티브 smooth 는 충돌하므로 사용하지 않음 */
   body {
     @apply bg-paper text-ink font-sans antialiased;
     -webkit-font-smoothing: antialiased;

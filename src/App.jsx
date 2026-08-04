@@ -6,8 +6,11 @@ import ScrollToTop from "./components/ScrollToTop";
 import Intro from "./components/Intro";
 import RouteTransition from "./components/RouteTransition";
 import Home from "./Home";
+import { useSmoothScroll } from "./hooks/useSmoothScroll";
 
 function App() {
+  useSmoothScroll();
+
   return (
     <>
       <Intro />

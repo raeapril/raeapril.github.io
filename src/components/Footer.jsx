@@ -6,7 +6,7 @@ const EMAIL = "meerae.shin@gmail.com";
 function Footer() {
   return (
     <footer className="border-t border-line bg-paper">
-      <div className="container-x py-16 md:py-20">
+      <div className="container-x py-12 md:py-16">
         <div className="grid gap-12 md:grid-cols-[1.5fr_1fr_1fr]">
             <a
               href={`mailto:${EMAIL}`}
