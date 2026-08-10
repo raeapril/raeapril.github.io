@@ -1,7 +1,8 @@
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import flowerImg from "../assets/flower.jpg";
+import { PROJECTS } from "../data/projects";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,38 +15,9 @@ gsap.registerPlugin(ScrollTrigger);
  * 카드는 [텍스트 | 단일 이미지] 2열이라 접히면 한 장짜리 이미지의 윗부분 슬라이스만 보인다.
  * 타임라인이 끝나면 pin 이 풀리며 스택 전체가 통째로 스크롤되어 다음 섹션으로 이어진다.
  *
- * 실제 프로젝트로 교체 시 PROJECTS 의 title/tag/desc/thumb 만 바꾸면 됨.
+ * 각 카드는 hover 시 타이틀에 포인트색 선이 그어지고 'go to detail' 라벨이 뜨며, 클릭하면 상세(/work/:slug)로 이동.
+ * 프로젝트 데이터는 data/projects.js 에서 공유한다.
  */
-const PROJECTS = [
-  {
-    no: "N°01",
-    title: "Totally async",
-    tag: "WEB / PUBLISHING",
-    desc: "반응형 마크업과 시맨틱 구조로 구현한 웹 퍼블리싱. 디자인 의도를 픽셀 단위로 옮겼습니다.",
-    thumb: flowerImg,
-  },
-  {
-    no: "N°02",
-    title: "Fixed monthly rate",
-    tag: "LANDING / INTERACTION",
-    desc: "스크롤 인터랙션과 모션을 얹은 랜딩 페이지. 가볍고 매끄러운 사용자 경험에 집중했습니다.",
-    thumb: flowerImg,
-  },
-  {
-    no: "N°03",
-    title: "Lightning fast delivery",
-    tag: "COMPONENT / SYSTEM",
-    desc: "재사용 가능한 컴포넌트 시스템 설계. 유지보수와 확장성을 고려한 구조를 만들었습니다.",
-    thumb: flowerImg,
-  },
-  {
-    no: "N°04",
-    title: "Workspace",
-    tag: "APP / DASHBOARD",
-    desc: "데이터 밀도가 높은 대시보드 UI 퍼블리싱. 정보 위계를 또렷하게 정리했습니다.",
-    thumb: flowerImg,
-  },
-];
 
 // 바 높이(=접힌 타이틀 바)와 핀 시작 오프셋(고정 네비 높이). CSS 클래스와 값을 맞춘다.
 const TOP_MD = 80;
@@ -59,6 +31,8 @@ function Work() {
   const rootRef = useRef(null);
   const pinRef = useRef(null);
   const cardsRef = useRef([]);
+  const [activeIndex, setActiveIndex] = useState(null); // 현재 hover 중인 카드 index
+  const navigate = useNavigate();
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -103,8 +77,10 @@ function Work() {
     return () => ctx.revert();
   }, []);
 
+  const goDetail = (slug) => navigate(`/work/${slug}`);
+
   return (
-    <section id="work" ref={rootRef} className="scroll-mt-24">
+    <section id="work" ref={rootRef} className="scroll-mt-24 pb-20 md:pb-0">
       {/* 섹션 인트로 */}
       <div className="container-x">
         <p className="eyebrow mb-3">WORK</p>
@@ -116,29 +92,56 @@ function Work() {
       </div>
 
       {/* 핀 컨테이너 — 스크럽 동안 화면에 고정되고, 카드가 아래에서 올라와 쌓인다 */}
-      <div
-        ref={pinRef}
-        className="relative h-screen overflow-hidden"
-      >
+      <div ref={pinRef} className="relative h-screen overflow-hidden">
         {PROJECTS.map((proj, i) => (
           <article
             key={proj.no}
             ref={(el) => (cardsRef.current[i] = el)}
             style={{ zIndex: i + 1 }}
-            className="absolute inset-x-0 top-0 border-t border-line bg-paper will-change-transform"
+            className="group absolute inset-x-0 top-0 cursor-pointer border-t border-line bg-paper will-change-transform"
+            role="link"
+            tabIndex={0}
+            aria-label={`${proj.title} 상세 보기`}
+            onMouseEnter={() => setActiveIndex(i)}
+            onMouseLeave={() => setActiveIndex(null)}
+            onClick={() => goDetail(proj.slug)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                goDetail(proj.slug);
+              }
+            }}
           >
             {/* grid 의 py-4 가 타이틀·이미지를 함께 내린다(위 정렬). 이 위패딩은 BAR 에 포함됨. */}
             <div className="container-x">
-              <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_340px] py-4 md:gap-10">
+              {/* hover 시: 다른 카드는 흐려지고(dim), 이 카드만 또렷하게 강조 */}
+              <div
+                className={`grid grid-cols-1 py-4 transition-opacity duration-500 ease-smooth md:grid-cols-[minmax(0,1fr)_340px] md:gap-10 ${
+                  activeIndex !== null && activeIndex !== i
+                    ? "opacity-40"
+                    : "opacity-100"
+                }`}
+              >
                 {/* 텍스트 열 — 타이틀 바(위, 높이=BAR) + 설명(아래) */}
                 <div className="flex flex-col">
                   <div className="flex h-[40px] items-center gap-4 md:h-[44px] md:gap-8">
-                    <span className="eyebrow hidden shrink-0 sm:block">
+                    <span className="eyebrow hidden shrink-0 transition-colors duration-500 group-hover:text-accent sm:block">
                       {proj.no}
                     </span>
-                    <h3 className="display truncate text-2xl/[1.2] tracking-tight md:text-3xl/[1.2] lg:text-4xl/[1.2]">
-                      {proj.title}
-                    </h3>
+                    {/* 타이틀 + hover 시 텍스트 가운데를 가로지르는 포인트색 선(왼→오른쪽) */}
+                    <span className="relative inline-flex">
+                      <h3 className="display whitespace-nowrap text-2xl/[1.2] tracking-tight md:text-3xl/[1.2] lg:text-4xl/[1.2]">
+                        {proj.title}
+                      </h3>
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute left-0 top-1/2 h-[2px] w-full origin-left -translate-y-1/2 scale-x-0 bg-accent transition-transform duration-500 ease-smooth group-hover:scale-x-100 md:h-[3px]"
+                      />
+                    </span>
+                    {/* 선이 다 그어진 뒤(delay-500) 타이틀 옆에 'go to detail' 이 슬라이드 인 */}
+                    <span className="hidden shrink-0 translate-x-2 whitespace-nowrap text-xs font-semibold uppercase tracking-[0.15em] text-accent opacity-0 transition-[opacity,transform] duration-300 ease-smooth group-hover:translate-x-0 group-hover:opacity-100 group-hover:delay-500 md:block">
+                      go to detail
+                    </span>
                   </div>
                   {/* 설명 — 다음 카드가 올라와 쌓이면 가려짐. pt 는 BAR 의 '타이틀 아래 여백'보다
                      크게 두어 접힘 시 태그가 라인 위로 삐져나오지 않게 한다. */}
@@ -155,7 +158,7 @@ function Work() {
                   <img
                     src={proj.thumb}
                     alt={proj.title}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition-transform duration-700 ease-smooth group-hover:scale-[1.04]"
                   />
                 </div>
               </div>

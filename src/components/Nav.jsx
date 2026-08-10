@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const NAV_ITEMS = [
   { id: "about", label: "About" },
@@ -10,7 +10,10 @@ const NAV_ITEMS = [
 function Nav() {
   // 현재 화면 중앙에 들어온 섹션 id (스크롤·클릭 이동 모두 반영)
   const [active, setActive] = useState("");
+  const { pathname } = useLocation();
 
+  // 라우트가 바뀌면(상세 → 홈 등) 섹션 DOM 이 새로 마운트되므로 옵저버를 재부착해야
+  // active 하이라이트가 정상 동작한다. → pathname 을 deps 에 둔다.
   useEffect(() => {
     const sections = NAV_ITEMS.map((item) =>
       document.getElementById(item.id)
@@ -37,7 +40,7 @@ function Nav() {
 
     sections.forEach((s) => observer.observe(s));
     return () => observer.disconnect();
-  }, []);
+  }, [pathname]);
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 text-ink">

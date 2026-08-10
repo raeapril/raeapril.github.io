@@ -5,6 +5,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// 현재 Lenis 인스턴스 (라우트 변경 시 스크롤 리셋 등 외부에서 접근용).
+let lenisInstance = null;
+export const getLenis = () => lenisInstance;
+
 /**
  * Lenis 스무스 스크롤을 켜고 GSAP ScrollTrigger 와 동기화한다 (레퍼런스 사이트 방식).
  * - Lenis 스크롤이 갱신될 때마다 ScrollTrigger.update() 호출
@@ -17,6 +21,7 @@ export function useSmoothScroll() {
       duration: 1.1,
       smoothWheel: true,
     });
+    lenisInstance = lenis;
 
     lenis.on("scroll", ScrollTrigger.update);
 
@@ -40,6 +45,7 @@ export function useSmoothScroll() {
       document.removeEventListener("click", onAnchorClick);
       gsap.ticker.remove(onTick);
       lenis.destroy();
+      lenisInstance = null;
     };
   }, []);
 }

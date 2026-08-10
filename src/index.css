@@ -257,47 +257,12 @@
   opacity: 1;
 }
 
-/* ---------------- 라우트 전환 커튼 ---------------- */
-.curtain {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  background: #111111;
-  transform: scaleY(0);
-  transform-origin: bottom;
-  pointer-events: none;
-}
-.curtain--active {
-  animation: curtain-wipe 0.7s cubic-bezier(0.76, 0, 0.24, 1) forwards;
-}
-@keyframes curtain-wipe {
-  0% {
-    transform: scaleY(0);
-    transform-origin: bottom;
-  }
-  45% {
-    transform: scaleY(1);
-    transform-origin: bottom;
-  }
-  55% {
-    transform: scaleY(1);
-    transform-origin: top;
-  }
-  100% {
-    transform: scaleY(0);
-    transform-origin: top;
-  }
-}
-
 /* 모션 최소화 선호 사용자 배려 */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
   .intro {
-    display: none;
-  }
-  .curtain {
     display: none;
   }
 }

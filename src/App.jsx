@@ -4,8 +4,8 @@ import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
 import Intro from "./components/Intro";
-import RouteTransition from "./components/RouteTransition";
 import Home from "./Home";
+import WorkDetail from "./WorkDetail";
 import { useSmoothScroll } from "./hooks/useSmoothScroll";
 
 function App() {
@@ -16,11 +16,10 @@ function App() {
       <Intro />
       <ScrollToTop />
       <Nav />
-      <RouteTransition>
-        <Routes>
-          <Route path="/" element={<Home />} />
-        </Routes>
-      </RouteTransition>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/work/:slug" element={<WorkDetail />} />
+      </Routes>
       <Footer />
     </>
   );
