@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 const NAV_ITEMS = [
-  { id: "about", label: "About" },
-  { id: "skills", label: "Skills" },
-  { id: "work", label: "Work" },
+  { id: "about", label: "ABOUT" },
+  { id: "skills", label: "SKILLS" },
+  { id: "work", label: "WORK" },
 ];
 
 function Nav() {
@@ -44,7 +44,7 @@ function Nav() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 text-ink">
-      <nav className="container-x flex h-16 items-center justify-between md:h-20">
+      <nav className="mx-auto flex h-16 w-full items-center justify-between px-6 md:h-20 md:px-10 lg:px-16">
         <Link to="/" data-logo className="display text-lg tracking-[0.05em] md:text-xl">
           RAE<span className="text-accent text-[1.6em] leading-none">.</span>
         </Link>

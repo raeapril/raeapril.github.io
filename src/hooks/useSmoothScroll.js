@@ -29,6 +29,12 @@ export function useSmoothScroll() {
     gsap.ticker.add(onTick);
     gsap.ticker.lagSmoothing(0);
 
+    // 히어로 이미지 등 늦게 로드되는 리소스로 레이아웃이 밀리면 ScrollTrigger 의
+    // start 위치가 어긋나 인입 애니메이션이 화면 밖에서 재생될 수 있다 → 로드 후 refresh.
+    const onLoad = () => ScrollTrigger.refresh();
+    if (document.readyState === "complete") ScrollTrigger.refresh();
+    else window.addEventListener("load", onLoad);
+
     // 앵커 이동(#about 등)도 Lenis 로 부드럽게
     const onAnchorClick = (e) => {
       const a = e.target.closest('a[href^="#"]');
@@ -43,6 +49,7 @@ export function useSmoothScroll() {
 
     return () => {
       document.removeEventListener("click", onAnchorClick);
+      window.removeEventListener("load", onLoad);
       gsap.ticker.remove(onTick);
       lenis.destroy();
       lenisInstance = null;

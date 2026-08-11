@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PROJECTS } from "../data/projects";
+import SectionHeading from "./SectionHeading";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -82,14 +83,11 @@ function Work() {
   return (
     <section id="work" ref={rootRef} className="scroll-mt-24 pb-20 md:pb-0">
       {/* 섹션 인트로 */}
-      <div className="container-x">
-        <p className="eyebrow mb-3">WORK</p>
-        <h2 className="display text-3xl/[1.2] md:text-4xl/[1.2]">
-          참여한
-          <br />
-          작업<span className="text-accent">.</span>
-        </h2>
-      </div>
+      <SectionHeading eyebrow="WORK" className="container-x">
+        참여한
+        <br />
+        작업<span className="text-accent">.</span>
+      </SectionHeading>
 
       {/* 핀 컨테이너 — 스크럽 동안 화면에 고정되고, 카드가 아래에서 올라와 쌓인다 */}
       <div ref={pinRef} className="relative h-screen overflow-hidden">

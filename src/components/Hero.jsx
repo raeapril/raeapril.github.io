@@ -161,7 +161,7 @@ function Hero() {
 
           {/* 메인 진입 안내 — 창 모양 아래 작은 scroll 큐 */}
           <span
-            className="scroll-cue pointer-events-none absolute left-1/2 top-full z-20 mt-8 flex -translate-x-1/2 flex-col items-center gap-3 text-[0.65rem] uppercase tracking-[0.3em] text-muted"
+            className="scroll-cue pointer-events-none absolute left-1/2 top-full z-20 mt-8 flex -translate-x-1/2 flex-col items-center gap-3 text-xs uppercase tracking-[0.3em] text-muted"
             style={{ opacity: scrollHint }}
           >
             scroll
