@@ -66,7 +66,10 @@ function SectionHeading({ eyebrow, children, className = "" }) {
           </span>
         ))}
       </p>
-      <h2 ref={titleRef} className="display text-3xl/[1.2] md:text-4xl/[1.2]">
+      <h2
+        ref={titleRef}
+        className="display text-3xl/[1.2] tracking-normal md:text-4xl/[1.2]"
+      >
         {children}
       </h2>
     </div>

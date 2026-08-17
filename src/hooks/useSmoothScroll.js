@@ -35,6 +35,17 @@ export function useSmoothScroll() {
     if (document.readyState === "complete") ScrollTrigger.refresh();
     else window.addEventListener("load", onLoad);
 
+    // 인트로 프리로더가 body.overflow 를 잠근 채 끝나며 레이아웃이 확정되므로,
+    // 인트로 종료 후 다시 refresh 해 트리거 start 위치를 바로잡는다.
+    let introRefreshTimer;
+    const onIntroDone = () => {
+      ScrollTrigger.refresh();
+      // overflow 해제 등 마무리 레이아웃까지 반영되도록 한 번 더.
+      introRefreshTimer = setTimeout(() => ScrollTrigger.refresh(), 800);
+    };
+    if (window.__introDone) onIntroDone();
+    else window.addEventListener("intro:done", onIntroDone);
+
     // 앵커 이동(#about 등)도 Lenis 로 부드럽게
     const onAnchorClick = (e) => {
       const a = e.target.closest('a[href^="#"]');
@@ -50,6 +61,8 @@ export function useSmoothScroll() {
     return () => {
       document.removeEventListener("click", onAnchorClick);
       window.removeEventListener("load", onLoad);
+      window.removeEventListener("intro:done", onIntroDone);
+      clearTimeout(introRefreshTimer);
       gsap.ticker.remove(onTick);
       lenis.destroy();
       lenisInstance = null;

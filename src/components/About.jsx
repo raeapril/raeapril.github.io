@@ -1,5 +1,9 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SectionHeading from "./SectionHeading";
+
+gsap.registerPlugin(ScrollTrigger);
 
 // item.title 앞에 붙는 네잎 클로버 도형 (겹쳐진 원형 잎 4개)
 function Shape({ className }) {
@@ -12,7 +16,14 @@ function Shape({ className }) {
   return (
     <svg className={className} viewBox="0 0 24 24" aria-hidden={true}>
       {leaves.map((l) => (
-        <circle key={`${l.cx}-${l.cy}`} cx={l.cx} cy={l.cy} r="5" fill="currentColor" />
+        <circle
+          key={`${l.cx}-${l.cy}`}
+          cx={l.cx}
+          cy={l.cy}
+          r="5"
+          fill="currentColor"
+          fillOpacity={0.5}
+        />
       ))}
     </svg>
   );
@@ -46,98 +57,69 @@ const ABOUT_ITEMS = [
 ];
 
 function About() {
-  // 현재 hover(또는 포커스)된 키워드 index. 기본은 첫 항목.
-  const [active, setActive] = useState(0);
-  const current = ABOUT_ITEMS[active];
+  const rootRef = useRef(null);
+  const headingRef = useRef(null);
+  const cardsRef = useRef([]);
 
-  // 오른쪽 패널 내용을 활성 버튼과 같은 세로 위치에 맞추기 위한 offset
-  const ulRef = useRef(null);
-  const btnRefs = useRef([]);
-  const [offset, setOffset] = useState(0);
-
+  // 스크롤 진입 시: ① 타이틀 등장 → ② 카드가 아래에서 1→2→3→4 순서로 등장.
   useLayoutEffect(() => {
-    // md(768px) 미만(모바일)에서는 세로로 쌓이므로 정렬 offset 을 끈다.
-    const mq = window.matchMedia("(min-width: 768px)");
+    const ctx = gsap.context(() => {
+      const cards = cardsRef.current.filter(Boolean);
 
-    const update = () => {
-      const btn = btnRefs.current[active];
-      const ul = ulRef.current;
-      if (mq.matches && btn && ul) {
-        setOffset(
-          btn.getBoundingClientRect().top - ul.getBoundingClientRect().top
-        );
-      } else {
-        setOffset(0);
-      }
-    };
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: rootRef.current,
+          start: "top 75%",
+          toggleActions: "play none none reverse",
+        },
+        defaults: { ease: "power3.out" },
+      });
+      tl.from(headingRef.current, { autoAlpha: 0, y: 30, duration: 0.6 }).from(
+        cards,
+        { autoAlpha: 0, y: 40, duration: 0.6, stagger: 0.15 },
+        "+=0.1"
+      );
+    }, rootRef);
 
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, [active]);
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <section id="about" className="container-x scroll-mt-24 pb-24 md:pb-36">
-      <SectionHeading eyebrow="ABOUT">
-        하는 일,
-        <br />
-        잘하는 일<span className="text-accent">.</span>
-      </SectionHeading>
-
-      <div className="mt-12 grid gap-6 md:grid-cols-[4fr_6fr] md:gap-12">
-        {/* 왼쪽: 키워드 목록 */}
-        <ul ref={ulRef} className="flex flex-col">
-          {ABOUT_ITEMS.map((item, i) => (
-            <li key={item.no}>
-              <button
-                type="button"
-                ref={(el) => (btnRefs.current[i] = el)}
-                onMouseEnter={() => setActive(i)}
-                onFocus={() => setActive(i)}
-                aria-pressed={active === i}
-                className="flex w-full items-center gap-4 py-2 text-left transition-colors md:py-4"
-              >
-                <Shape
-                  className={`h-5 w-5 shrink-0 transition-colors md:h-6 md:w-6 ${
-                    active === i ? "text-accent" : "text-ink/40"
-                  }`}
-                />
-                <span
-                  className={`display text-2xl transition-colors md:text-4xl ${
-                    active === i ? "text-ink" : "text-ink/40"
-                  }`}
-                >
-                  {item.title}
-                </span>
-                {/* 타이틀과 넘버를 이어주는 선 (호버 시 우측으로 그어짐) */}
-                <span
-                  className={`ml-2 hidden h-px flex-1 origin-left bg-accent transition-transform duration-500 ease-out md:block ${
-                    active === i ? "scale-x-100" : "scale-x-0"
-                  }`}
-                />
-              </button>
-            </li>
-          ))}
-        </ul>
-
-        {/* 오른쪽: 선택된 키워드 설명 패널 (활성 버튼과 같은 세로 위치에 정렬) */}
-        <div className="relative min-h-[16rem]">
-          <div
-            className="transition-transform duration-500 ease-out"
-            style={{ transform: `translateY(${offset}px)` }}
-          >
-            <span className="display text-5xl text-accent/20 md:text-6xl">
-              {current.no}
-            </span>
-            <p className="mt-4 text-lg font-semibold md:text-xl">
-              {current.lead}
-            </p>
-            <p className="mt-4 text-sm leading-relaxed text-ink/60 md:text-base">
-              {current.desc}
-            </p>
-          </div>
-        </div>
+    <section id="about" ref={rootRef} className="container-x pb-28 md:pb-38">
+      <div ref={headingRef}>
+        <SectionHeading eyebrow="ABOUT">
+          하는 일,
+          <br className="hidden md:block" />
+          잘하는 일<span className="text-accent">.</span>
+        </SectionHeading>
       </div>
+
+      <ul className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8 md:mt-16">
+        {ABOUT_ITEMS.map((item, i) => (
+          <li
+            key={item.no}
+            ref={(el) => (cardsRef.current[i] = el)}
+            className="relative flex flex-col md:pb-14"
+          >
+            {/* 클로버 + 옆 라인 */}
+            <div className="flex items-center gap-3">
+              <Shape className="block h-9 w-9 shrink-0 text-accent md:h-12 md:w-12" />
+              {/* <span className="h-px flex-1 bg-accent" /> */}
+            </div>
+
+            {/* 카드 안 내용 */}
+            <div className="relative flex flex-col">
+              <h3 className="display mt-1 text-2xl tracking-tight md:text-3xl md:mt-3">
+                {item.title}
+              </h3>
+              <p className="mt-1 text-base font-semibold md:mt-3">{item.lead}</p>
+              <p className="mt-2 text-sm leading-relaxed text-ink/60 md:mt-3">
+                {item.desc}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

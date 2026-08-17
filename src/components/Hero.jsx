@@ -148,7 +148,7 @@ function Hero() {
             progress={webText}
             from="below"
             breakMobile
-            className={`${HERO_TEXT_BASE} bottom-[7%] left-0 -translate-x-[6%] min-[1200px]:bottom-[12%] min-[1200px]:-translate-x-1/2`}
+            className={`${HERO_TEXT_BASE} bottom-[-18%] left-0 -translate-x-[6%] min-[1200px]:bottom-[12%] min-[1200px]:-translate-x-1/2`}
           />
 
           {/* 이미지 우측 상단 가장자리에 반쯤 걸침 */}
@@ -156,7 +156,7 @@ function Hero() {
             text="PORTFOLIO"
             progress={meeraeText}
             from="above"
-            className={`${HERO_TEXT_BASE} right-0 top-[-7%] translate-x-[6%] min-[1200px]:top-[12%] min-[1200px]:translate-x-1/2`}
+            className={`${HERO_TEXT_BASE} right-0 top-[-8%] translate-x-[6%] min-[1200px]:top-[12%] min-[1200px]:translate-x-1/2`}
           />
 
           {/* 메인 진입 안내 — 창 모양 아래 작은 scroll 큐 */}
