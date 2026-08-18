@@ -101,17 +101,18 @@ function About() {
             ref={(el) => (cardsRef.current[i] = el)}
             className="relative flex flex-col md:pb-14"
           >
-            {/* 클로버 + 옆 라인 */}
-            <div className="flex items-center gap-3">
-              <Shape className="block h-9 w-9 shrink-0 text-accent md:h-12 md:w-12" />
-              {/* <span className="h-px flex-1 bg-accent" /> */}
-            </div>
-
             {/* 카드 안 내용 */}
             <div className="relative flex flex-col">
-              <h3 className="display mt-1 text-2xl tracking-tight md:text-3xl md:mt-3">
-                {item.title}
-              </h3>
+              <div className="flex items-center gap-2">
+                {/* 클로버 */}
+                <div className="flex items-center gap-3">
+                  <Shape className="block h-[27px] w-[27px] shrink-0 text-accent md:h-9 md:w-9" />
+                </div>
+                {/* 타이틀 */}
+                <h3 className="display text-2xl tracking-tight md:text-3xl">
+                  {item.title}
+                </h3>
+              </div>
               <p className="mt-1 text-base font-semibold md:mt-3">{item.lead}</p>
               <p className="mt-2 text-sm leading-relaxed text-ink/60 md:mt-3">
                 {item.desc}

@@ -59,7 +59,7 @@ function Skills() {
   }, []);
 
   return (
-    <section id="skills" ref={rootRef} className="container-x pb-28 md:pb-38">
+    <section id="skills" ref={rootRef} className="container-x">
       <div className="grid gap-10 md:grid-cols-2 md:gap-16 lg:gap-24">
         {/* 왼쪽 — sticky 고정 타이틀 */}
         <div className="md:sticky md:top-24 md:flex md:h-[calc(100vh-12rem)] md:flex-col">
