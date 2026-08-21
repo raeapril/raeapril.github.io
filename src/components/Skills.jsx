@@ -14,14 +14,14 @@ const FONTS = [
 ];
 
 const SKILLS = [
-  { name: "HTML", desc: "시맨틱 마크업 · 반응형" },
-  { name: "CSS", desc: "시맨틱 마크업 · 반응형" },
-  { name: "JavaScript", desc: "ES6+ · DOM · 인터랙션" },
-  { name: "React", desc: "컴포넌트 · 훅 · SPA" },
-  { name: "Tailwind CSS", desc: "유틸리티 · 디자인 토큰" },
-  { name: "GSAP", desc: "스크롤 · 모션" },
-  { name: "Figma", desc: "시안 분석 · 핸드오프" },
-  { name: "GitHub", desc: "버전 관리 · 협업" },
+  { name: "HTML", desc: "시맨틱 마크업" },
+  { name: "CSS", desc: "반응형" },
+  { name: "JavaScript", desc: "ES6+" },
+  { name: "React", desc: "컴포넌트" },
+  { name: "Tailwind CSS", desc: "유틸리티" },
+  { name: "GSAP", desc: "모션" },
+  { name: "Figma", desc: "시안 분석" },
+  { name: "GitHub", desc: "버전 관리" },
 ];
 
 /**
@@ -35,24 +35,31 @@ function Skills() {
   const imgRef = useRef(null);
   const itemsRef = useRef([]);
 
-  // 스크롤 인입 시: ① 타이틀 → ② 아래 이미지 서서히 등장 → ③ 오른쪽 키워드들.
+  // 스크롤 인입 시 — About 과 동일한 시퀀스(하나의 타임라인).
+  //  ① eyebrow(SKILLS) 도로록 → ② 도로록 끝난 뒤 title 슬라이드 + 콘텐츠(이미지·키워드) 페이드가 "동시" 시작.
+  //  (콘텐츠는 위치 변화·시간차 없이 opacity 0→1)
   useLayoutEffect(() => {
+    const h = headingRef.current;
+    if (!h) return;
+    const content = [imgRef.current, ...itemsRef.current.filter(Boolean)];
+
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: rootRef.current,
-          start: "top 70%",
-          toggleActions: "play none none reverse",
-        },
-        defaults: { ease: "power3.out" },
-      });
-      tl.from(headingRef.current, { autoAlpha: 0, y: 30, duration: 0.6 })
-        .from(imgRef.current, { autoAlpha: 0, y: 24, duration: 0.8 }, "-=0.15")
-        .from(
-          itemsRef.current.filter(Boolean),
-          { autoAlpha: 0, y: 40, duration: 0.5, stagger: 0.1 },
-          "-=0.3"
-        );
+      gsap.set(h.letters, { yPercent: 100 });
+      gsap.set(h.title, { y: 40, opacity: 0 });
+      gsap.set(content, { autoAlpha: 0 });
+
+      gsap
+        .timeline({
+          scrollTrigger: {
+            trigger: rootRef.current,
+            start: "top 70%",
+            toggleActions: "play none none reverse",
+          },
+          defaults: { ease: "power3.out" },
+        })
+        .to(h.letters, { yPercent: 0, duration: 0.5, stagger: 0.06 })
+        .to(h.title, { y: 0, opacity: 1, duration: 0.7 }, ">")
+        .to(content, { autoAlpha: 1, duration: 0.6 }, "<");
     }, rootRef);
 
     return () => ctx.revert();
@@ -63,13 +70,11 @@ function Skills() {
       <div className="grid gap-10 md:grid-cols-2 md:gap-16 lg:gap-24">
         {/* 왼쪽 — sticky 고정 타이틀 */}
         <div className="md:sticky md:top-24 md:flex md:h-[calc(100vh-12rem)] md:flex-col">
-          <div ref={headingRef}>
-            <SectionHeading eyebrow="SKILLS">
-              다룰 수 있는
-              <br className="hidden md:block" />
-              기술<span className="text-accent">.</span>
-            </SectionHeading>
-          </div>
+          <SectionHeading eyebrow="SKILLS" exposeRef={headingRef}>
+            다룰 수 있는
+            <br className="hidden md:block" />
+            기술<span className="text-accent">.</span>
+          </SectionHeading>
           {/* 이미지 — 타이틀 뒤 서서히 등장 */}
           <img
             ref={imgRef}
@@ -80,7 +85,7 @@ function Skills() {
         </div>
 
         {/* 오른쪽 — 스킬 이름 리스트 */}
-        <ul className="flex flex-col">
+        <ul className="flex flex-col  border-b border-line">
           {SKILLS.map((skill, i) => (
             <li
               key={skill.name}

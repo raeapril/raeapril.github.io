@@ -57,52 +57,59 @@ const ABOUT_ITEMS = [
 ];
 
 function About() {
-  const rootRef = useRef(null);
-  const headingRef = useRef(null);
+  const headingRef = useRef(null); // SectionHeading 이 노출하는 { root, letters, title }
   const cardsRef = useRef([]);
 
-  // 스크롤 진입 시: ① 타이틀 등장 → ② 카드가 아래에서 1→2→3→4 순서로 등장.
+  // 하나의 타임라인으로 About 등장 시퀀스를 구성한다.
+  //  ① eyebrow(ABOUT) 도로록 → ② 도로록이 끝난 뒤 title 슬라이드 + 카드 페이드가 "동시" 시작.
+  //  (카드는 위치 변화·시간차 없이 opacity 0→1)
   useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      const cards = cardsRef.current.filter(Boolean);
+    const h = headingRef.current;
+    if (!h) return;
+    const cards = cardsRef.current.filter(Boolean);
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: rootRef.current,
-          start: "top 75%",
-          toggleActions: "play none none reverse",
-        },
-        defaults: { ease: "power3.out" },
-      });
-      tl.from(headingRef.current, { autoAlpha: 0, y: 30, duration: 0.6 }).from(
-        cards,
-        { autoAlpha: 0, y: 40, duration: 0.6, stagger: 0.15 },
-        "+=0.1"
-      );
-    }, rootRef);
+    const ctx = gsap.context(() => {
+      gsap.set(h.letters, { yPercent: 100 });
+      gsap.set(h.title, { y: 40, opacity: 0 });
+      gsap.set(cards, { autoAlpha: 0 });
+
+      gsap
+        .timeline({
+          scrollTrigger: {
+            trigger: h.root,
+            start: "top 80%",
+            toggleActions: "play none none reverse",
+          },
+          defaults: { ease: "power3.out" },
+        })
+        // ① 도로록
+        .to(h.letters, { yPercent: 0, duration: 0.5, stagger: 0.06 })
+        // ② 도로록 끝난 뒤(">") title 시작
+        .to(h.title, { y: 0, opacity: 1, duration: 0.7 }, ">")
+        // 같은 시점("<")에 카드 전체를 opacity 만 페이드 인
+        .to(cards, { autoAlpha: 1, duration: 0.6 }, "<");
+    });
 
     return () => ctx.revert();
   }, []);
 
   return (
-    <section id="about" ref={rootRef} className="container-x pb-28 md:pb-38">
-      <div ref={headingRef}>
-        <SectionHeading eyebrow="ABOUT">
-          하는 일,
-          <br className="hidden md:block" />
-          잘하는 일<span className="text-accent">.</span>
-        </SectionHeading>
-      </div>
+    <section id="about" className="container-x pb-28 md:pb-38">
+      <SectionHeading eyebrow="ABOUT" exposeRef={headingRef}>
+        하는 일,
+        <br className="hidden md:block" />
+        잘하는 일<span className="text-accent">.</span>
+      </SectionHeading>
 
       <ul className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8 md:mt-16">
         {ABOUT_ITEMS.map((item, i) => (
           <li
             key={item.no}
             ref={(el) => (cardsRef.current[i] = el)}
-            className="relative flex flex-col md:pb-14"
+            className="relative flex flex-col"
           >
             {/* 카드 안 내용 */}
-            <div className="relative flex flex-col">
+            <div className="relative">
               <div className="flex items-center gap-2">
                 {/* 클로버 */}
                 <div className="flex items-center gap-3">
