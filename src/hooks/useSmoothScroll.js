@@ -23,6 +23,17 @@ export function useSmoothScroll() {
     });
     lenisInstance = lenis;
 
+    // 새로고침으로 스크롤이 복원됐더라도 Lenis 는 항상 최상단에서 시작하게 맞춘다.
+    // (해시 앵커로 직접 진입한 경우는 ScrollToTop 이 따로 처리하므로 제외)
+    if (!window.location.hash) {
+      window.scrollTo(0, 0);
+      lenis.scrollTo(0, { immediate: true });
+    }
+
+    // 인트로가 재생되는 동안엔 스크롤을 잠근다(Lenis 는 body overflow:hidden 을 무시하므로
+    // 직접 멈춰야 인트로 중 스크롤이 쌓이지 않는다). intro:done 에서 해제.
+    if (!window.__introDone) lenis.stop();
+
     lenis.on("scroll", ScrollTrigger.update);
 
     const onTick = (time) => lenis.raf(time * 1000);
@@ -31,14 +42,25 @@ export function useSmoothScroll() {
 
     // 히어로 이미지 등 늦게 로드되는 리소스로 레이아웃이 밀리면 ScrollTrigger 의
     // start 위치가 어긋나 인입 애니메이션이 화면 밖에서 재생될 수 있다 → 로드 후 refresh.
-    const onLoad = () => ScrollTrigger.refresh();
-    if (document.readyState === "complete") ScrollTrigger.refresh();
+    // 이 시점에 브라우저가 뒤늦게 스크롤을 복원하는 경우도 있어 최상단으로 한 번 더 고정.
+    const resetTop = () => {
+      if (!window.location.hash) {
+        window.scrollTo(0, 0);
+        lenis.scrollTo(0, { immediate: true });
+      }
+      ScrollTrigger.refresh();
+    };
+    const onLoad = resetTop;
+    if (document.readyState === "complete") resetTop();
     else window.addEventListener("load", onLoad);
 
     // 인트로 프리로더가 body.overflow 를 잠근 채 끝나며 레이아웃이 확정되므로,
     // 인트로 종료 후 다시 refresh 해 트리거 start 위치를 바로잡는다.
     let introRefreshTimer;
     const onIntroDone = () => {
+      // 잠갔던 스크롤을 풀기 전, 인트로 중 혹시 남은 스크롤을 최상단으로 정리.
+      if (!window.location.hash) lenis.scrollTo(0, { immediate: true });
+      lenis.start();
       ScrollTrigger.refresh();
       // overflow 해제 등 마무리 레이아웃까지 반영되도록 한 번 더.
       introRefreshTimer = setTimeout(() => ScrollTrigger.refresh(), 800);

@@ -41,17 +41,13 @@ function Intro() {
         // 합체(join) → 배경 걷히며 RAE 박힘(plant) → RAE 사라짐(reveal) → 제거
         timers.push(setTimeout(() => setPhase("join"), 350));
         timers.push(setTimeout(() => setPhase("plant"), 1300));
-        timers.push(
-          setTimeout(() => {
-            // RAE 가 사라지기 시작하는 순간 히어로 헤드라인 등장 신호
-            setPhase("reveal");
-            signalIntroDone();
-          }, 2150)
-        );
+        timers.push(setTimeout(() => setPhase("reveal"), 2150));
         timers.push(
           setTimeout(() => {
             setHidden(true);
             document.body.style.overflow = "";
+            // 인트로(로더 + RAE 마크)가 완전히 사라진 뒤에야 스크롤 허용 + 스크롤 큐 노출.
+            signalIntroDone();
           }, 2800)
         );
         return;

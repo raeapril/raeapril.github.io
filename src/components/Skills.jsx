@@ -1,10 +1,7 @@
-import { useLayoutEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useRef } from "react";
 import SectionHeading from "./SectionHeading";
+import { useHeadingReveal } from "../hooks/useHeadingReveal";
 import flowerImg from "../assets/flower_4.jpg";
-
-gsap.registerPlugin(ScrollTrigger);
 
 // 키워드마다 번갈아 쓰는 3개 폰트: Playfair Display · Montserrat · Inter
 const FONTS = [
@@ -35,41 +32,20 @@ function Skills() {
   const imgRef = useRef(null);
   const itemsRef = useRef([]);
 
-  // 스크롤 인입 시 — About 과 동일한 시퀀스(하나의 타임라인).
-  //  ① eyebrow(SKILLS) 도로록 → ② 도로록 끝난 뒤 title 슬라이드 + 콘텐츠(이미지·키워드) 페이드가 "동시" 시작.
-  //  (콘텐츠는 위치 변화·시간차 없이 opacity 0→1)
-  useLayoutEffect(() => {
-    const h = headingRef.current;
-    if (!h) return;
-    const content = [imgRef.current, ...itemsRef.current.filter(Boolean)];
-
-    const ctx = gsap.context(() => {
-      gsap.set(h.letters, { yPercent: 100 });
-      gsap.set(h.title, { y: 40, opacity: 0 });
-      gsap.set(content, { autoAlpha: 0 });
-
-      gsap
-        .timeline({
-          scrollTrigger: {
-            trigger: rootRef.current,
-            start: "top 70%",
-            toggleActions: "play none none reverse",
-          },
-          defaults: { ease: "power3.out" },
-        })
-        .to(h.letters, { yPercent: 0, duration: 0.5, stagger: 0.06 })
-        .to(h.title, { y: 0, opacity: 1, duration: 0.7 }, ">")
-        .to(content, { autoAlpha: 1, duration: 0.6 }, "<");
-    }, rootRef);
-
-    return () => ctx.revert();
-  }, []);
+  // eyebrow(SKILLS) 도로록 → 도로록 끝난 뒤 title + 콘텐츠(이미지·키워드)가 동시에 페이드 인.
+  useHeadingReveal(
+    headingRef,
+    () => [imgRef.current, ...itemsRef.current],
+    { triggerRef: rootRef, start: "top 70%" }
+  );
 
   return (
     <section id="skills" ref={rootRef} className="container-x">
       <div className="grid gap-10 md:grid-cols-2 md:gap-16 lg:gap-24">
-        {/* 왼쪽 — sticky 고정 타이틀 */}
-        <div className="md:sticky md:top-24 md:flex md:h-[calc(100vh-12rem)] md:flex-col">
+        {/* 왼쪽 — sticky 고정 타이틀.
+            self-start + 내용 높이로 두어야(고정 높이 X) 큰 화면에서도 그리드 행이 늘어나
+            리스트 아래 빈 공간이 생기지 않는다(마지막 항목이 하단까지 도달). */}
+        <div className="md:sticky md:top-24 md:self-start">
           <SectionHeading eyebrow="SKILLS" exposeRef={headingRef}>
             다룰 수 있는
             <br className="hidden md:block" />
@@ -85,7 +61,7 @@ function Skills() {
         </div>
 
         {/* 오른쪽 — 스킬 이름 리스트 */}
-        <ul className="flex flex-col  border-b border-line">
+        <ul className="flex flex-col border-b border-line">
           {SKILLS.map((skill, i) => (
             <li
               key={skill.name}

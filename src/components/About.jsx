@@ -1,9 +1,6 @@
-import { useLayoutEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useRef } from "react";
 import SectionHeading from "./SectionHeading";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useHeadingReveal } from "../hooks/useHeadingReveal";
 
 // item.title 앞에 붙는 네잎 클로버 도형 (겹쳐진 원형 잎 4개)
 function Shape({ className }) {
@@ -60,41 +57,11 @@ function About() {
   const headingRef = useRef(null); // SectionHeading 이 노출하는 { root, letters, title }
   const cardsRef = useRef([]);
 
-  // 하나의 타임라인으로 About 등장 시퀀스를 구성한다.
-  //  ① eyebrow(ABOUT) 도로록 → ② 도로록이 끝난 뒤 title 슬라이드 + 카드 페이드가 "동시" 시작.
-  //  (카드는 위치 변화·시간차 없이 opacity 0→1)
-  useLayoutEffect(() => {
-    const h = headingRef.current;
-    if (!h) return;
-    const cards = cardsRef.current.filter(Boolean);
-
-    const ctx = gsap.context(() => {
-      gsap.set(h.letters, { yPercent: 100 });
-      gsap.set(h.title, { y: 40, opacity: 0 });
-      gsap.set(cards, { autoAlpha: 0 });
-
-      gsap
-        .timeline({
-          scrollTrigger: {
-            trigger: h.root,
-            start: "top 80%",
-            toggleActions: "play none none reverse",
-          },
-          defaults: { ease: "power3.out" },
-        })
-        // ① 도로록
-        .to(h.letters, { yPercent: 0, duration: 0.5, stagger: 0.06 })
-        // ② 도로록 끝난 뒤(">") title 시작
-        .to(h.title, { y: 0, opacity: 1, duration: 0.7 }, ">")
-        // 같은 시점("<")에 카드 전체를 opacity 만 페이드 인
-        .to(cards, { autoAlpha: 1, duration: 0.6 }, "<");
-    });
-
-    return () => ctx.revert();
-  }, []);
+  // eyebrow(ABOUT) 도로록 → 도로록 끝난 뒤 title + 카드가 동시에 페이드 인.
+  useHeadingReveal(headingRef, () => cardsRef.current, { start: "top 80%" });
 
   return (
-    <section id="about" className="container-x pb-28 md:pb-38">
+    <section id="about" className="container-x pb-48 md:pb-38">
       <SectionHeading eyebrow="ABOUT" exposeRef={headingRef}>
         하는 일,
         <br className="hidden md:block" />

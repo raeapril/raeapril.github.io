@@ -1,4 +1,4 @@
-import { memo, useMemo, useRef } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import flowerImg from "../assets/flower.jpg";
 import { clamp } from "../utils/math";
 import { useScrollProgress } from "../hooks/useScrollProgress";
@@ -80,6 +80,15 @@ function Hero() {
   const trackRef = useRef(null);
   const p = useScrollProgress(trackRef);
 
+  // 인트로(로더 + RAE 마크)가 완전히 사라져 스크롤이 가능해진 뒤에만 스크롤 큐를 노출한다.
+  const [introDone, setIntroDone] = useState(() => !!window.__introDone);
+  useEffect(() => {
+    if (window.__introDone) return;
+    const onDone = () => setIntroDone(true);
+    window.addEventListener("intro:done", onDone);
+    return () => window.removeEventListener("intro:done", onDone);
+  }, []);
+
   // 빗방울 — 한 번만 생성 후 렌더 결과까지 메모 (스크롤 프레임마다 재생성 방지)
   const rainDrops = useMemo(
     () =>
@@ -109,7 +118,8 @@ function Hero() {
   // 확장이 끝난 뒤 문구가 순차로 도로록 등장
   const webText = range(0.6, 0.78); // WEB PUBLISHING — 좌측 하단
   const meeraeText = range(0.82, 0.98); // MEERAE — 우측 상단
-  const scrollHint = 1 - range(0, 0.06); // 메인 진입 안내 — 스크롤 시작하면 사라짐
+  // 메인 진입 안내 — 인트로가 끝난 뒤 등장하고, 스크롤을 시작하면 사라짐
+  const scrollHint = introDone ? 1 - range(0, 0.06) : 0;
 
   return (
     <section ref={trackRef} className="relative h-[420vh]">

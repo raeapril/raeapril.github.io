@@ -3,6 +3,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PROJECTS } from "../data/projects";
 import SectionHeading from "./SectionHeading";
+import { useHeadingReveal } from "../hooks/useHeadingReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -18,35 +19,18 @@ function Work() {
   const headingRef = useRef(null);
   const cardsRef = useRef([]);
 
+  // eyebrow(WORK) 도로록 → 도로록 끝난 뒤 title + 카드가 동시에 페이드 인.
+  useHeadingReveal(headingRef, () => cardsRef.current, {
+    triggerRef: rootRef,
+    start: "top 75%",
+  });
+
+  // 트랙 pin + 세로 스크롤 진행도를 가로 이동(x)에 매핑.
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const track = trackRef.current;
       const pin = pinRef.current;
       if (!track || !pin) return;
-
-      // 진입 시 ani — About 과 동일한 시퀀스(하나의 타임라인).
-      //  ① eyebrow(WORK) 도로록 → ② 도로록 끝난 뒤 title 슬라이드 + 카드 페이드가 "동시" 시작.
-      //  (카드는 위치 변화·시간차 없이 opacity 0→1)
-      const h = headingRef.current;
-      const cards = cardsRef.current.filter(Boolean);
-      if (h) {
-        gsap.set(h.letters, { yPercent: 100 });
-        gsap.set(h.title, { y: 40, opacity: 0 });
-        gsap.set(cards, { autoAlpha: 0 });
-
-        gsap
-          .timeline({
-            scrollTrigger: {
-              trigger: rootRef.current,
-              start: "top 75%",
-              toggleActions: "play none none reverse",
-            },
-            defaults: { ease: "power3.out" },
-          })
-          .to(h.letters, { yPercent: 0, duration: 0.5, stagger: 0.06 })
-          .to(h.title, { y: 0, opacity: 1, duration: 0.7 }, ">")
-          .to(cards, { autoAlpha: 1, duration: 0.6 }, "<");
-      }
 
       const dist = () => {
         const pr = parseFloat(getComputedStyle(track).paddingRight) || 0;
@@ -57,6 +41,8 @@ function Work() {
         start: "top top",
         end: () => "+=" + dist(),
         pin: true,
+        // Lenis 스무스 스크롤에서 pin 이 뒤늦게 걸려 화면이 '툭' 튀는 것을 방지
+        anticipatePin: 1,
         scrub: 0.6,
         invalidateOnRefresh: true,
         onUpdate: (self) => gsap.set(track, { x: -dist() * self.progress }),
@@ -67,7 +53,7 @@ function Work() {
   }, []);
 
   return (
-    <section id="work" ref={rootRef} className="scroll-mt-24">
+    <section id="work" ref={rootRef}>
       {/* 핀 컨테이너 — 타이틀은 위 고정, 아래 카드 트랙이 세로 스크롤 동안 왼쪽으로 이동 */}
       <div
         ref={pinRef}

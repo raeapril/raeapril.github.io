@@ -11,7 +11,9 @@ import { getLenis } from "../hooks/useSmoothScroll";
 function ScrollToTop() {
   const { pathname, hash, state } = useLocation();
 
-  // 새로고침 때 브라우저가 이전 스크롤 위치를 복원하지 않도록(항상 우리가 제어)
+  // 새로고침 때 브라우저가 이전 스크롤 위치를 복원하지 않도록(항상 우리가 제어).
+  // main.jsx 에서 먼저 설정하지만 react-router(history) 초기화가 이를 "auto" 로 되돌리므로,
+  // 마운트 후(라우터 초기화 뒤) 다시 "manual" 로 확정한다.
   useEffect(() => {
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";
