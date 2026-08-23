@@ -2,7 +2,7 @@ import { useRef } from "react";
 import SectionHeading from "./SectionHeading";
 import { useHeadingReveal } from "../hooks/useHeadingReveal";
 
-// item.title 앞에 붙는 네잎 클로버 도형 (겹쳐진 원형 잎 4개)
+// 클로버 도형
 function Shape({ className }) {
   const leaves = [
     { cx: 12, cy: 7 },
@@ -54,10 +54,9 @@ const ABOUT_ITEMS = [
 ];
 
 function About() {
-  const headingRef = useRef(null); // SectionHeading 이 노출하는 { root, letters, title }
+  const headingRef = useRef(null);
   const cardsRef = useRef([]);
 
-  // eyebrow(ABOUT) 도로록 → 도로록 끝난 뒤 title + 카드가 동시에 페이드 인.
   useHeadingReveal(headingRef, () => cardsRef.current, { start: "top 80%" });
 
   return (

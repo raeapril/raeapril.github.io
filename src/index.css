@@ -5,7 +5,6 @@
 @tailwind utilities;
 
 @layer base {
-  /* 스무스 스크롤은 Lenis 가 담당 (useSmoothScroll). 네이티브 smooth 는 충돌하므로 사용하지 않음 */
   body {
     @apply bg-paper text-ink font-sans antialiased;
     -webkit-font-smoothing: antialiased;
@@ -47,25 +46,21 @@
 }
 
 
-/* ---------------- 비 내리는 아치 창문 → 이미지 전환 후 넓이 확장 ----------------
-   단계별 진행도: --round(모서리) --frame(창틀) --size(넓이 300→600). */
+/* ---------------- 비 내리는 아치 창문 → 이미지 전환 후 넓이 확장 ---------------- */
 .hero-window {
   --start-w: min(60vw, 300px);
   --end-w: min(calc(100vw - 3rem), 630px);
   position: relative;
   box-sizing: border-box;
   overflow: hidden;
-  /* 마스크만 300px → 600px 로 넓어짐(높이 고정). 이미지는 가만히 있고 옆 영역이 드러남 */
   width: calc(var(--start-w) + (var(--end-w) - var(--start-w)) * var(--size));
   height: calc(var(--start-w) * 36 / 26);
   border-style: solid;
   border-color: #e5d2d1;
-  /* 창틀은 --frame, 둥근 모서리는 --round 로 각각 단계별로 사라짐 */
   border-width: calc(0.5rem * var(--frame));
   border-radius: calc(50% * var(--round)) calc(50% * var(--round)) 0 0 /
     calc(36.1% * var(--round)) calc(36.1% * var(--round)) 0 0;
 }
-/* 창 안의 꽃 이미지 — 폭 고정(=최대 넓이) + 중앙 고정. 마스크가 넓어지면 옆이 드러남 */
 .hero-window__img {
   position: absolute;
   top: 0;
@@ -75,7 +70,6 @@
   height: 100%;
   object-fit: cover;
 }
-/* 흰 뿌연 오버레이(간유리) — opacity 는 인라인으로 스크롤 단계에 따라 조절 */
 .hero-window__haze {
   position: absolute;
   inset: 0;
@@ -86,7 +80,7 @@
   position: absolute;
   inset: 0;
 }
-/* 빗방울 — 얇은 세로선이 위에서 아래로 떨어짐 */
+/* 빗방울 */
 .rd-drop {
   position: absolute;
   top: 0;
@@ -101,6 +95,40 @@
   animation-iteration-count: infinite;
   will-change: transform;
 }
+/* 텍스트 */
+[aria-label="WEB PUBLISHER"] {
+  left: 0;
+  bottom: -9%;
+  transform: translateX(-25%);
+}
+[aria-label="PORTFOLIO"] {
+  right: 0;
+  top: -9%;
+  transform: translateX(40%);
+}
+@media screen and (max-width:1024px) {
+  [aria-label="PORTFOLIO"] {
+    transform: translateX(20%);
+  }
+}/* md */
+@media screen and (max-width:840px) {
+  [aria-label="WEB PUBLISHER"] {
+      bottom: -16%;
+      transform: translateX(-2%);
+  }
+  [aria-label="PORTFOLIO"] {
+    top: -7%;
+    transform: translateX(2%);
+  }
+}/* sm */
+@media screen and (max-width:500px) {
+  [aria-label="WEB PUBLISHER"] {
+      bottom: -22%;
+  }
+  [aria-label="PORTFOLIO"] {
+    top: -10%;
+  }
+}/* xsm */
 @keyframes rd-fall {
   from {
     transform: translateY(-60px);
@@ -115,8 +143,7 @@
   }
 }
 
-/* ---------------- 메인 진입 스크롤 안내 큐 ----------------
-   'scroll' 문구 아래 얇은 세로선을 따라 짧은 조각이 아래로 흘러내린다. */
+/* ---------------- 메인 진입 스크롤 안내 큐 ---------------- */
 .scroll-cue {
   transition: opacity 0.4s ease;
 }
@@ -152,11 +179,7 @@
   }
 }
 
-/* ---------------- 도입부 프리로더 (Intro) ----------------
-   분리→합체 (letsplayfight 방식):
-   워드마크가 좌/우 두 조각으로 벌어진 채 아래에서 떠오르고, 그 사이에서
-   숫자가 000→100 카운팅. 100이 되면 두 조각이 가운데로 모여 'RAE.'로 합체
-   되고 숫자는 사이로 사라진다. 이후 로더가 페이드되며 메인 등장. */
+/* ---------------- 도입부 프리로더 (Intro) ---------------- */
 .intro {
   position: fixed;
   inset: 0;
@@ -172,13 +195,10 @@
   background: #111111;
   transition: opacity 0.7s cubic-bezier(0.76, 0, 0.24, 1);
 }
-/* plant/reveal: 배경이 걷히며 메인(밝은 배경) 노출 */
 .intro--plant .intro__bg,
 .intro--reveal .intro__bg {
   opacity: 0;
 }
-
-/* 워드마크 조각 행 — 좌조각 / (가운데 숫자) / 우조각 */
 .intro__mark {
   position: relative;
   display: flex;
@@ -191,13 +211,11 @@
   transition: color 0.7s cubic-bezier(0.76, 0, 0.24, 1),
     opacity 0.55s ease;
 }
-/* plant: 합체된 MEERAE 가 색이 바뀌며 중앙에 박힘 */
 .intro--plant .intro__mark,
 .intro--reveal .intro__mark {
   color: #E5D2D1;
   /* opacity: 0.8; */
 }
-/* 글자 단위 — reveal 때 한 글자씩 위로 또로로록 사라짐 */
 .intro__char {
   display: inline-block;
   transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1),
@@ -213,7 +231,6 @@
     opacity 0.6s ease;
   will-change: transform, opacity;
 }
-/* 기본(rise): 아래에서 + 벌어진 상태 + 투명 */
 .intro__piece--l {
   transform: translate(-0.85em, 1.4rem);
   opacity: 0;
@@ -222,7 +239,6 @@
   transform: translate(0.85em, 1.4rem);
   opacity: 0;
 }
-/* apart: 떠올라 벌어진 채로 표시 (카운팅 중) */
 .intro--apart .intro__piece--l {
   transform: translate(-0.85em, 0);
   opacity: 1;
@@ -231,7 +247,6 @@
   transform: translate(0.85em, 0);
   opacity: 1;
 }
-/* join 이후(plant/reveal 포함): 가운데로 모여 합체 상태 유지 */
 .intro--join .intro__piece--l,
 .intro--plant .intro__piece--l,
 .intro--reveal .intro__piece--l,
@@ -241,8 +256,6 @@
   transform: translate(0, 0);
   opacity: 1;
 }
-
-/* 숫자 카운터 — 두 조각 사이 정중앙, 합체 시 사이로 사라짐 */
 .intro__count {
   position: absolute;
   left: 50%;
@@ -258,8 +271,6 @@
 .intro--apart .intro__count {
   opacity: 1;
 }
-
-/* 모션 최소화 선호 사용자 배려 */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

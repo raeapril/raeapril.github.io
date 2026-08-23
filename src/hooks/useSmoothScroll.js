@@ -10,7 +10,7 @@ let lenisInstance = null;
 export const getLenis = () => lenisInstance;
 
 /**
- * Lenis 스무스 스크롤을 켜고 GSAP ScrollTrigger 와 동기화한다 (레퍼런스 사이트 방식).
+ * Lenis 스무스 스크롤을 켜고 GSAP ScrollTrigger 와 동기화한다.
  * - Lenis 스크롤이 갱신될 때마다 ScrollTrigger.update() 호출
  * - GSAP ticker 로 Lenis 의 rAF 를 구동 (별도 rAF 루프 없이 프레임 일치)
  * App 최상단에서 한 번만 사용한다.
