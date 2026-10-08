@@ -79,7 +79,7 @@ function Work() {
           <>
             Selected
             <br />
-            Work
+            Work<span className="text-point">.</span>
             <sup className="ml-3 align-top font-mono text-[0.14em] font-normal tracking-normal text-point">
               ({String(WORK.length).padStart(2, "0")})
             </sup>
@@ -107,7 +107,7 @@ function Work() {
                 onBlur={() => setHover(-1)}
                 // 모바일: 번호 | 제목 | 화살표 한 줄 + 아래로 썸네일·설명 (2~3열 걸침)
                 // 900px 이상: 번호 | 제목 | 설명 | 화살표 한 줄
-                className="grid grid-cols-[28px_minmax(0,1fr)_40px] items-center gap-x-3 gap-y-4 py-[clamp(20px,2.2vw,40px)] min-[900px]:grid-cols-[80px_minmax(0,1.6fr)_minmax(0,1fr)_60px] min-[900px]:gap-[clamp(12px,2vw,40px)]"
+                className="grid grid-cols-[32px_minmax(0,1fr)_40px] items-center gap-x-3 gap-y-4 py-[clamp(20px,2.2vw,40px)] min-[900px]:grid-cols-[80px_minmax(0,1.6fr)_minmax(0,1fr)_60px] min-[900px]:gap-[clamp(12px,2vw,40px)]"
                 style={{
                   // 다른 행에 올라가 있으면 나머지는 어둡게
                   color: hover < 0 || on ? "#f2efe9" : "#5d5b57",
@@ -115,7 +115,7 @@ function Work() {
                   transition: `color 0.35s, padding 0.5s ${SMOOTH}`,
                 }}
               >
-                <span className="font-mono text-xs text-point">{proj.no}</span>
+                <span className="whitespace-nowrap font-mono text-xs text-point">{proj.no}</span>
                 <span className="type-title min-w-0 text-[clamp(26px,3.4vw,68px)] leading-[1.02] [text-wrap:pretty]">
                   {proj.title}
                 </span>

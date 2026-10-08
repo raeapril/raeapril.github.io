@@ -313,7 +313,7 @@ function About() {
         title={
           <>
             What
-            <br />I do
+            <br />I do<span className="text-point">.</span>
           </>
         }
       >
@@ -332,7 +332,7 @@ function About() {
               </div>
               <div className="flex flex-col gap-3 px-[clamp(8px,1vw,16px)] pb-[clamp(8px,1vw,16px)]">
                 <div className="flex items-baseline gap-3.5">
-                  <span className="font-mono text-xs text-point">{item.no}</span>
+                  <span className="whitespace-nowrap font-mono text-xs text-point">{item.no}</span>
                   <h3 className="type-title m-0 text-[clamp(30px,2.6vw,52px)] leading-none">
                     {item.title}
                   </h3>

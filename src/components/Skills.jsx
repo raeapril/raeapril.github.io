@@ -40,7 +40,7 @@ function Skills() {
       <div className="site-x site-head-gap flex flex-wrap items-end justify-between gap-6">
         {/* 아래 마키가 큰 글자 역할을 하므로 제목은 작은 라벨로 둔다 */}
         <h2 className="type-title m-0 text-[clamp(24px,2.4vw,40px)] leading-none text-cream">
-          Skills
+          Skills<span className="text-point">.</span>
         </h2>
         <p className="type-body m-0">다룰 수 있는 기술.</p>
       </div>
