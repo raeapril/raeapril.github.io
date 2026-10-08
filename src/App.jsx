@@ -32,7 +32,7 @@ function App() {
         <Work />
         <About />
         <Skills />
-        <Contact />
+        <Contact sceneReady={sceneReady} />
       </main>
     </div>
   );

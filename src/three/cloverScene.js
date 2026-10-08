@@ -201,29 +201,49 @@ export function createCloverScene(host, { autoRotate = true, thumbs = [] } = {})
   pivot.add(thumb);
   const P = { k: 0, shown: -1, zLock: null, px: 0, py: 0 };
 
-  const tc = document.createElement("canvas");
-  const textTex = new THREE.CanvasTexture(tc);
-  textTex.colorSpace = THREE.SRGBColorSpace;
-  const textPlane = new THREE.Mesh(
-    new THREE.PlaneGeometry(1, 1),
-    new THREE.MeshBasicMaterial({ map: textTex, toneMapped: false })
-  );
-  textPlane.position.z = -1.6;
-  scene.add(textPlane);
+  // 클로버 뒤에 깔리는 화면 크기 타이포 판. 히어로("WEB PUBLISHER")와 Contact("LET'S WORK TOGETHER") 두 장
+  function textLayer() {
+    const canvas = document.createElement("canvas");
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const plane = new THREE.Mesh(
+      new THREE.PlaneGeometry(1, 1),
+      new THREE.MeshBasicMaterial({ map: tex, toneMapped: false })
+    );
+    plane.position.z = -1.6;
+    scene.add(plane);
+    return { canvas, tex, plane };
+  }
+  const heroText = textLayer();
+  const contactText = textLayer();
+  const textPlane = heroText.plane;
 
   const S = { vw: 0, vh: 0, visH: 1, fit: 1, sizeFit: 1, heroLift: 0, heroBoost: 1, w0: 1, h0: 1 };
 
-  function drawText() {
-    const ctx = tc.getContext("2d");
+  const display = (px) => `800 ${px}px "Bricolage Grotesque", sans-serif`;
+
+  /** 화면 비율에 맞춰 캔버스를 다시 잡고 배경색으로 비운다 */
+  function prepare({ canvas, tex }) {
+    const ctx = canvas.getContext("2d");
     const height = Math.round(2048 / (S.vw / S.vh));
     // WebGL2 텍스처는 처음 올린 크기로 고정된다. 화면 비율이 바뀌어 캔버스 크기가 달라지면
     // 기존 GPU 텍스처를 버려 새 크기로 다시 만들게 한다(안 그러면 글자가 늘어나 찌그러짐).
-    if (tc.height !== height) textTex.dispose();
-    tc.width = 2048;
-    tc.height = height;
+    if (canvas.height !== height) tex.dispose();
+    canvas.width = 2048;
+    canvas.height = height;
     ctx.fillStyle = BG_CSS;
-    ctx.fillRect(0, 0, tc.width, tc.height);
-    const display = (px) => `800 ${px}px "Bricolage Grotesque", sans-serif`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    return ctx;
+  }
+
+  function drawText() {
+    drawHeroText();
+    drawContactText();
+  }
+
+  function drawHeroText() {
+    const tc = heroText.canvas;
+    const ctx = prepare(heroText);
     const hasLS = "letterSpacing" in ctx;
 
     // "PUBLISHER" 가 화면 폭의 92% 를 채우도록 글자 크기 역산
@@ -250,7 +270,44 @@ export function createCloverScene(host, { autoRotate = true, thumbs = [] } = {})
     ctx.textAlign = "right";
     ctx.fillText(`(PORTFOLIO — ${new Date().getFullYear()})`, tc.width * 0.96, y1 - fs * 0.6);
     ctx.textAlign = "left";
-    textTex.needsUpdate = true;
+    heroText.tex.needsUpdate = true;
+  }
+
+  // Contact: 히어로와 같은 크기·자간으로 가운데 정렬. 마지막 마침표만 포인트 컬러
+  function drawContactText() {
+    const tc = contactText.canvas;
+    const ctx = prepare(contactText);
+    const hasLS = "letterSpacing" in ctx;
+    const L1 = "LET\u2019S WORK";
+    const L2 = "TOGETHER";
+
+    ctx.font = display(100);
+    if (hasLS) ctx.letterSpacing = "-4.5px";
+    const widest = Math.max(ctx.measureText(L1).width, ctx.measureText(`${L2}.`).width);
+    // 히어로(92%)보다 작게 — 긴 줄이 화면 폭의 52%
+    const fs = (100 * tc.width * 0.52) / widest;
+    ctx.font = display(fs);
+    if (hasLS) ctx.letterSpacing = `${-fs * 0.045}px`;
+
+    // 두 줄 덩어리(대문자 높이 ≈ 0.72fs)의 가운데를 화면 42% 높이에 둔다 — 아래쪽은 이메일 자리
+    const lh = fs * 0.86;
+    const y2 = tc.height * 0.42 + (lh + fs * 0.72) / 2;
+    const y1 = y2 - lh;
+    const cx = tc.width / 2;
+    ctx.fillStyle = INK;
+    ctx.textBaseline = "alphabetic";
+    ctx.textAlign = "center";
+    ctx.fillText(L1, cx, y1);
+    // 2줄은 "TOGETHER." 전체 폭 기준으로 가운데에 두고, 마침표만 색을 바꿔 이어 그린다
+    const w2 = ctx.measureText(L2).width;
+    const wDot = ctx.measureText(".").width;
+    const x2 = cx - (w2 + wDot) / 2;
+    ctx.textAlign = "left";
+    ctx.fillText(L2, x2, y2);
+    ctx.fillStyle = POINT;
+    ctx.fillText(".", x2 + w2, y2);
+    if (hasLS) ctx.letterSpacing = "0px";
+    contactText.tex.needsUpdate = true;
   }
 
   function resize() {
@@ -263,7 +320,8 @@ export function createCloverScene(host, { autoRotate = true, thumbs = [] } = {})
     cam.updateProjectionMatrix();
     const dist = cam.position.z - textPlane.position.z;
     S.visH = 2 * dist * Math.tan((cam.fov * Math.PI) / 360);
-    textPlane.scale.set(S.visH * cam.aspect, S.visH, 1);
+    heroText.plane.scale.set(S.visH * cam.aspect, S.visH, 1);
+    contactText.plane.scale.set(S.visH * cam.aspect, S.visH, 1);
     // 가로 이동 폭은 화면 비율에 맞춰 줄인다
     S.fit = clamp(cam.aspect / 1.5, 0.3, 1);
     // 클로버(폭 약 2.4)가 화면 폭의 50% 를 넘지 않게. 데스크톱(가로 화면)에서는 1 그대로
@@ -286,12 +344,15 @@ export function createCloverScene(host, { autoRotate = true, thumbs = [] } = {})
    * @param anchors 섹션 시작 스크롤 위치 4개
    * @param intro  인트로 로더가 끝난 뒤 0→1 로 차오르는 진행도
    * @param preview Work 목록에서 호버 중인 프로젝트 번호 (-1 = 없음)
+   * @param contactY Contact 타이포가 화면 정중앙에 오는 스크롤 위치
    */
-  function render(time, y, mouse, anchors, intro, preview = -1) {
+  function render(time, y, mouse, anchors, intro, preview = -1, contactY = Infinity) {
     if (!S.vw) return;
 
     // 배경 타이포는 인트로 동안 화면 아래에서 올라오고, 이후 페이지와 함께 위로 스크롤된다
     textPlane.position.y = (y / S.vh) * S.visH - (1 - intro) * S.visH;
+    // Contact 타이포도 페이지와 함께 움직이고, contactY 에서 화면 가운데에 온다
+    contactText.plane.position.y = ((y - contactY) / S.vh) * S.visH;
 
     let i = 0;
     while (i < anchors.length - 2 && y > anchors[i + 1]) i++;
@@ -389,8 +450,10 @@ export function createCloverScene(host, { autoRotate = true, thumbs = [] } = {})
     chrome.dispose();
     thumbMat.dispose();
     thumbTex.forEach((t) => t.dispose());
-    textPlane.material.dispose();
-    textTex.dispose();
+    [heroText, contactText].forEach((t) => {
+      t.plane.material.dispose();
+      t.tex.dispose();
+    });
     scene.environment?.dispose();
     renderer.dispose();
     renderer.domElement.remove();

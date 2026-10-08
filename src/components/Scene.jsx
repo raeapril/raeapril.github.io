@@ -16,6 +16,14 @@ function getAnchors() {
   });
 }
 
+/** Contact 섹션 가운데가 화면 가운데에 오는 스크롤 위치 (배경 타이포 "LET'S WORK TOGETHER" 기준점) */
+function getContactY() {
+  const el = document.getElementById("contact");
+  if (!el) return Infinity;
+  const r = el.getBoundingClientRect();
+  return r.top + window.scrollY + (r.height - window.innerHeight) / 2;
+}
+
 /**
  * 화면 전체에 고정되는 WebGL 배경. three.js 는 별도 청크로 늦게 불러오고,
  * 첫 프레임을 그리면 onReady 로 알려 HTML 대체 헤드라인을 숨기게 한다.
@@ -53,7 +61,7 @@ function Scene({ onReady, introStart = null, autoRotate = true }) {
       mouse.y += (mouse.ty - mouse.y) * 0.05;
       const start = introRef.current;
       const intro = start == null ? 0 : ease(clamp((t - start) / 1500));
-      scene.render((t - t0) / 1000, window.scrollY, mouse, getAnchors(), intro, workPreview.index);
+      scene.render((t - t0) / 1000, window.scrollY, mouse, getAnchors(), intro, workPreview.index, getContactY());
       if (!ready) {
         ready = true;
         onReadyRef.current?.();
