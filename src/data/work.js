@@ -14,6 +14,15 @@ import clabImgMo from "../assets/clab_mo.jpg";
 import mojImgMo from "../assets/moj_mo.jpg";
 import etechhiveImgMo from "../assets/etechhive_mo.jpg";
 
+// 데스크톱 호버 시 3D 유리 클로버 안에 들어가는 1:1 썸네일 (없으면 thumbMobile 을 가운데 정사각형으로 잘라 씀)
+import rzImgSq from "../assets/rz_sq.jpg";
+import bankitImgSq from "../assets/bankit_sq.jpg";
+import jigutImgSq from "../assets/jigu_sq.jpg";
+import msaferImgSq from "../assets/msafer_sq.jpg";
+import clabImgSq from "../assets/clab_sq.jpg";
+import mojImgSq from "../assets/moj_sq.jpg";
+import etechhiveImgSq from "../assets/etechhive_sq.jpg";
+
 const PROJECTS = [
   {
     no: "N°01",
@@ -22,6 +31,7 @@ const PROJECTS = [
     desc: "앱 접근성 인증 마크 획득",
     thumb: rzImg,
     thumbMobile: rzImgMo,
+    thumbClover: rzImgSq,
     link: "https://play.google.com/store/apps/details?id=com.lgchem.rz",
   },
   {
@@ -31,6 +41,7 @@ const PROJECTS = [
     desc: "웹/앱 접근성 인증 마크 획득",
     thumb: bankitImg,
     thumbMobile: bankitImgMo,
+    thumbClover: bankitImgSq,
     link: "https://bankit.kr/",
   },
   {
@@ -40,6 +51,7 @@ const PROJECTS = [
     desc: "GDWEB 디자인 어워드 수상",
     thumb: jigutImg,
     thumbMobile: jigutImgMo,
+    thumbClover: jigutImgSq,
     link: "https://jigutoktok.causeworks.kr/",
   },
   {
@@ -49,6 +61,7 @@ const PROJECTS = [
     desc: "공공 서비스 구축",
     thumb: msaferImg,
     thumbMobile: msaferImgMo,
+    thumbClover: msaferImgSq,
     link: "https://www.msafer.or.kr/index.do",
   },
   {
@@ -58,6 +71,7 @@ const PROJECTS = [
     desc: "프론트엔드 UI 개발 기여",
     thumb: clabImg,
     thumbMobile: clabImgMo,
+    thumbClover: clabImgSq,
     link: "https://clab.iba.or.kr/",
   },
   {
@@ -67,6 +81,7 @@ const PROJECTS = [
     desc: "다양한 동적 인터랙션 구현",
     thumb: mojImg,
     thumbMobile: mojImgMo,
+    thumbClover: mojImgSq,
     link: "https://happybean.naver.com/campaign/legalsupport2025",
   },
   {
@@ -76,6 +91,7 @@ const PROJECTS = [
     desc: "다양한 동적 인터랙션 구현",
     thumb: etechhiveImg,
     thumbMobile: etechhiveImgMo,
+    thumbClover: etechhiveImgSq,
     link: "https://happybean.naver.com/campaign/greencluster",
   }
 ];

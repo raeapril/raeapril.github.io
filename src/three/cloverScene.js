@@ -14,10 +14,12 @@ const KEYFRAMES = [
   { x: 0, y: 0.15, s: 1.2 },
 ];
 
-// 원 4개를 겹친 네잎 클로버 실루엣을 두께감 있게 압출한다.
-function cloverGeometry() {
-  const d = 0.5;
-  const r = 0.56;
+// 원 4개를 겹친 네잎 클로버 실루엣 (바깥 반경 = d + r = 1.06)
+const CLOVER_D = 0.5;
+const CLOVER_R = 0.56;
+function cloverShape() {
+  const d = CLOVER_D;
+  const r = CLOVER_R;
   const s = Math.sqrt(2 * r * r - d * d);
   const k = (d + s) / 2;
   const shape = new THREE.Shape();
@@ -29,7 +31,12 @@ function cloverGeometry() {
     const [bx, by] = cusps[i + 1];
     shape.absarc(cx, cy, r, Math.atan2(ay - cy, ax - cx), Math.atan2(by - cy, bx - cx), false);
   });
-  const g = new THREE.ExtrudeGeometry(shape, {
+  return shape;
+}
+
+// 클로버 실루엣을 두께감 있게 압출한다.
+function cloverGeometry() {
+  const g = new THREE.ExtrudeGeometry(cloverShape(), {
     depth: 0.12,
     bevelEnabled: true,
     bevelThickness: 0.2,
@@ -78,7 +85,7 @@ function studioEnvironment(renderer) {
  * 고정 배경 캔버스: 뒤쪽 평면에 "WEB PUBLISHER" 타이포를 그리고,
  * 그 앞에서 유리 클로버가 스크롤 구간마다 위치를 옮겨 다닌다.
  */
-export function createCloverScene(host, { autoRotate = true } = {}) {
+export function createCloverScene(host, { autoRotate = true, thumbs = [] } = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -128,6 +135,72 @@ export function createCloverScene(host, { autoRotate = true } = {}) {
     return m;
   });
 
+  // ── 클로버 안 썸네일 ──
+  // 유리 바로 뒤에 클로버 모양으로 자른 썸네일 판을 두면, 유리를 통해 굴절돼 "썸네일 위에 유리가 얹힌" 느낌이 난다.
+  // three 의 투과(transmission)는 불투명 물체만 비추므로 판은 불투명으로 두고, 나타나고 사라지는 건 배경색으로 페이드한다.
+  const loader = new THREE.TextureLoader();
+  // 이미지마다 비율이 달라도 가운데 정사각형만 쓰도록, 불러온 뒤 자를 범위(scale/offset)를 계산해 둔다
+  const thumbTex = thumbs.map((url) => {
+    const t = loader.load(url, () => {
+      const a = t.image.width / t.image.height;
+      t.userData.crop.set(a > 1 ? 1 / a : 1, a > 1 ? (1 - 1 / a) / 2 : 0, a < 1 ? a : 1, a < 1 ? (1 - a) / 2 : 0);
+    });
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.userData.crop = new THREE.Vector4(1, 0, 1, 0);
+    return t;
+  });
+  const thumbGeo = new THREE.ShapeGeometry(cloverShape(), 48);
+  {
+    // 실루엣(±1.06) 기준 0..1 UV
+    const ext = CLOVER_D + CLOVER_R;
+    const pos = thumbGeo.attributes.position;
+    const uv = thumbGeo.attributes.uv;
+    for (let k = 0; k < pos.count; k++) {
+      uv.setXY(k, (pos.getX(k) / ext) * 0.5 + 0.5, (pos.getY(k) / ext) * 0.5 + 0.5);
+    }
+    uv.needsUpdate = true;
+  }
+  const thumbMat = new THREE.ShaderMaterial({
+    uniforms: {
+      mapA: { value: thumbTex[0] ?? null },
+      mapB: { value: thumbTex[0] ?? null },
+      cropA: { value: new THREE.Vector4(1, 0, 1, 0) },
+      cropB: { value: new THREE.Vector4(1, 0, 1, 0) },
+      uMix: { value: 0 },
+      uFade: { value: 0 },
+      uBg: { value: new THREE.Color(BG) },
+    },
+    vertexShader: /* glsl */ `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }`,
+    fragmentShader: /* glsl */ `
+      uniform sampler2D mapA;
+      uniform sampler2D mapB;
+      uniform vec4 cropA; // (u 배율, u 시작, v 배율, v 시작)
+      uniform vec4 cropB;
+      uniform float uMix;
+      uniform float uFade;
+      uniform vec3 uBg;
+      varying vec2 vUv;
+      void main() {
+        vec2 uvA = vec2(vUv.x * cropA.x + cropA.y, vUv.y * cropA.z + cropA.w);
+        vec2 uvB = vec2(vUv.x * cropB.x + cropB.y, vUv.y * cropB.z + cropB.w);
+        vec3 c = mix(texture2D(mapA, uvA).rgb, texture2D(mapB, uvB).rgb, uMix);
+        gl_FragColor = vec4(mix(uBg, c, uFade), 1.0);
+        #include <colorspace_fragment>
+      }`,
+    toneMapped: false,
+  });
+  const thumb = new THREE.Mesh(thumbGeo, thumbMat);
+  // 유리 뒷면(z ≈ -0.26) 바로 뒤. 클로버 자체는 돌아도 썸네일은 항상 정면을 본다
+  thumb.position.z = -0.3;
+  thumb.visible = false;
+  pivot.add(thumb);
+  const P = { k: 0, shown: -1, zLock: null, px: 0, py: 0 };
+
   const tc = document.createElement("canvas");
   const textTex = new THREE.CanvasTexture(tc);
   textTex.colorSpace = THREE.SRGBColorSpace;
@@ -138,7 +211,7 @@ export function createCloverScene(host, { autoRotate = true } = {}) {
   textPlane.position.z = -1.6;
   scene.add(textPlane);
 
-  const S = { vw: 0, vh: 0, visH: 1, fit: 1, sizeFit: 1, heroLift: 0, heroBoost: 1 };
+  const S = { vw: 0, vh: 0, visH: 1, fit: 1, sizeFit: 1, heroLift: 0, heroBoost: 1, w0: 1, h0: 1 };
 
   function drawText() {
     const ctx = tc.getContext("2d");
@@ -196,6 +269,8 @@ export function createCloverScene(host, { autoRotate = true } = {}) {
     // 클로버(폭 약 2.4)가 화면 폭의 50% 를 넘지 않게. 데스크톱(가로 화면)에서는 1 그대로
     const visW0 = 2 * cam.position.z * Math.tan((cam.fov * Math.PI) / 360) * cam.aspect;
     S.sizeFit = Math.min(1, (visW0 * 0.5) / 2.4);
+    S.w0 = visW0;
+    S.h0 = visW0 / cam.aspect;
     // 세로 화면 히어로: 클로버를 화면 폭의 약 85% 까지 키우고 화면 정중앙(y=0)에 둔다
     // (히어로 키프레임의 기본 y=0.05 살짝 위 오프셋을 상쇄)
     const portrait = clamp((1 - cam.aspect) / 0.5);
@@ -210,8 +285,9 @@ export function createCloverScene(host, { autoRotate = true } = {}) {
    * @param mouse  { x, y } -1..1 로 보간된 포인터 위치
    * @param anchors 섹션 시작 스크롤 위치 4개
    * @param intro  인트로 로더가 끝난 뒤 0→1 로 차오르는 진행도
+   * @param preview Work 목록에서 호버 중인 프로젝트 번호 (-1 = 없음)
    */
-  function render(time, y, mouse, anchors, intro) {
+  function render(time, y, mouse, anchors, intro, preview = -1) {
     if (!S.vw) return;
 
     // 배경 타이포는 인트로 동안 화면 아래에서 올라오고, 이후 페이지와 함께 위로 스크롤된다
@@ -227,25 +303,79 @@ export function createCloverScene(host, { autoRotate = true } = {}) {
     const ty = lerp(ay, B.y, seg);
     const as = A.s * (i === 0 ? S.heroBoost : 1);
     const ts = lerp(as, B.s, seg) * S.sizeFit;
-    pivot.position.x += (tx - pivot.position.x) * 0.08;
-    pivot.position.y += (ty - pivot.position.y) * 0.08;
+
+    // 썸네일 미리보기: 호버 중이면 클로버가 커서 쪽으로 오고, 회전을 멈추고, 안에 썸네일이 차오른다
+    const on = preview >= 0 && preview < thumbTex.length;
+    P.k += ((on ? 1 : 0) - P.k) * 0.09;
+    const k = ease(P.k);
+    const goX = on ? mouse.tx * S.w0 * 0.5 : tx;
+    const goY = on ? -mouse.ty * S.h0 * 0.5 : ty;
+    const follow = on ? 0.12 : 0.08;
+    P.px = pivot.position.x;
+    P.py = pivot.position.y;
+    pivot.position.x += (goX - pivot.position.x) * follow;
+    pivot.position.y += (goY - pivot.position.y) * follow;
     // 로딩 중에는 작게 빙글빙글 돌다가 인트로가 끝나면 제 크기로 커진다
-    pivot.scale.setScalar(Math.max(0.001, ts * lerp(0.42, 1, intro)));
+    const size = lerp(ts, 0.62 * S.sizeFit, k);
+    pivot.scale.setScalar(Math.max(0.001, size * lerp(0.42, 1, intro)));
 
     const spin = autoRotate ? Math.sin(time * 0.45) * 0.55 : 0;
+    const rx = 0.18 + mouse.y * 0.3 + Math.sin(time * 0.6) * 0.08;
+    const ry = spin + mouse.x * 0.5 + Math.sin(y * 0.002) * 0.9 + (1 - intro) * time * 2.4;
+    const rz = time * 0.12 + y * 0.0012;
+    // 썸네일은 정면 고정이라, 유리 실루엣이 겹치도록 z 회전을 가장 가까운 90° 배수에 맞춘다(네잎이라 90° 대칭)
+    if (on && P.zLock === null) P.zLock = Math.round(rz / (Math.PI / 2)) * (Math.PI / 2);
+    if (!on && P.k < 0.01) P.zLock = null;
+    // 미리보기 중에는 움직인 만큼만 살짝 기울어 관성감을 준다
+    const vx = (pivot.position.x - P.px) / S.w0;
+    const vy = (pivot.position.y - P.py) / S.h0;
     clover.rotation.set(
-      0.18 + mouse.y * 0.3 + Math.sin(time * 0.6) * 0.08,
-      spin + mouse.x * 0.5 + Math.sin(y * 0.002) * 0.9 + (1 - intro) * time * 2.4,
-      time * 0.12 + y * 0.0012
+      lerp(rx, clamp(-vy * 9, -0.25, 0.25), k),
+      lerp(ry, clamp(vx * 9, -0.3, 0.3), k),
+      lerp(rz, P.zLock ?? rz, k)
     );
-    orbs.forEach((o, k) => {
-      const ang = time * (0.5 + k * 0.22) + k * 2.1;
-      const rad = 1.55 + k * 0.28;
+    // 두꺼운 유리는 썸네일을 너무 왜곡하므로 미리보기 중에는 얇게
+    glassMat.thickness = lerp(1.4, 0.7, k);
+
+    // 썸네일 교체: 다른 행으로 옮기면 이전 이미지에서 새 이미지로 교차 페이드
+    const U = thumbMat.uniforms;
+    if (on && preview !== P.shown) {
+      if (U.uFade.value < 0.05) {
+        // 거의 안 보이는 상태면 교차 페이드 없이 바로 교체
+        U.mapA.value = U.mapB.value = thumbTex[preview];
+        U.uMix.value = 0;
+      } else {
+        if (U.uMix.value > 0) U.mapA.value = U.mapB.value;
+        U.mapB.value = thumbTex[preview];
+        U.uMix.value = 0;
+      }
+      P.shown = preview;
+    }
+    if (U.mapB.value !== U.mapA.value) {
+      U.uMix.value = Math.min(1, U.uMix.value + 0.06);
+      if (U.uMix.value >= 1) {
+        U.mapA.value = U.mapB.value;
+        U.uMix.value = 0;
+      }
+    }
+    if (!on && P.k < 0.01) P.shown = -1;
+    if (U.mapA.value) {
+      U.cropA.value.copy(U.mapA.value.userData.crop);
+      U.cropB.value.copy(U.mapB.value.userData.crop);
+    }
+    U.uFade.value = k;
+    thumb.visible = k > 0.002;
+
+    orbs.forEach((o, n) => {
+      const ang = time * (0.5 + n * 0.22) + n * 2.1;
+      const rad = 1.55 + n * 0.28;
       o.position.set(
         Math.cos(ang) * rad,
-        Math.sin(ang * 1.3) * 0.5 + (k - 1) * 0.3,
+        Math.sin(ang * 1.3) * 0.5 + (n - 1) * 0.3,
         Math.sin(ang) * rad * 0.6
       );
+      // 미리보기 중에는 주변 구슬을 숨겨 덜 산만하게
+      o.scale.setScalar(Math.max(0.001, 1 - k));
     });
 
     renderer.render(scene, cam);
@@ -257,6 +387,8 @@ export function createCloverScene(host, { autoRotate = true } = {}) {
     });
     glassMat.dispose();
     chrome.dispose();
+    thumbMat.dispose();
+    thumbTex.forEach((t) => t.dispose());
     textPlane.material.dispose();
     textTex.dispose();
     scene.environment?.dispose();

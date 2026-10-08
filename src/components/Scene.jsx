@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import { clamp, ease } from "../lib/math";
+import { WORK } from "../data/work";
+import { workPreview } from "../lib/workPreview";
 
 // 클로버가 키프레임을 바꾸는 기준 섹션 (순서 = cloverScene 의 KEYFRAMES 순서)
 const ANCHOR_IDS = ["top", "work", "about", "contact"];
@@ -51,7 +53,7 @@ function Scene({ onReady, introStart = null, autoRotate = true }) {
       mouse.y += (mouse.ty - mouse.y) * 0.05;
       const start = introRef.current;
       const intro = start == null ? 0 : ease(clamp((t - start) / 1500));
-      scene.render((t - t0) / 1000, window.scrollY, mouse, getAnchors(), intro);
+      scene.render((t - t0) / 1000, window.scrollY, mouse, getAnchors(), intro, workPreview.index);
       if (!ready) {
         ready = true;
         onReadyRef.current?.();
@@ -67,7 +69,9 @@ function Scene({ onReady, introStart = null, autoRotate = true }) {
         return;
       }
       if (disposed || !hostRef.current) return;
-      const s = mod.createCloverScene(hostRef.current, { autoRotate });
+      // 클로버 안 썸네일: 1:1 전용 이미지, 없으면 정사각형에 가까운 모바일용 (데스크톱용은 3.8:1 배너)
+      const thumbs = WORK.map((w) => w.thumbClover ?? w.thumbMobile);
+      const s = mod.createCloverScene(hostRef.current, { autoRotate, thumbs });
       // 캔버스에 그리는 타이포가 대체 폰트로 찍히지 않도록 웹폰트 로드를 기다린다
       try {
         await Promise.all([

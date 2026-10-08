@@ -1,76 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { WORK } from "../data/work";
 import SectionHead from "./SectionHead";
-import { useFrame } from "../hooks/useFrame";
 import { useNarrow } from "../hooks/useNarrow";
-import { clamp } from "../lib/math";
+import { workPreview } from "../lib/workPreview";
 
 const SMOOTH = "cubic-bezier(0.22,1,0.36,1)";
-
-/**
- * 커서를 따라다니는 썸네일 미리보기. 이동 속도만큼 3D 로 기울어 관성감을 준다.
- * 위치는 매 프레임 DOM 에 직접 쓴다(React 리렌더 없이).
- */
-function Preview({ active }) {
-  const ref = useRef(null);
-  const p = useRef({ x: 0, y: 0, tx: 0, ty: 0, init: false });
-
-  useEffect(() => {
-    const onMove = (e) => {
-      const P = p.current;
-      P.tx = e.clientX;
-      P.ty = e.clientY;
-      if (!P.init) {
-        P.x = P.tx;
-        P.y = P.ty;
-        P.init = true;
-      }
-    };
-    window.addEventListener("pointermove", onMove);
-    return () => window.removeEventListener("pointermove", onMove);
-  }, []);
-
-  useFrame(() => {
-    const el = ref.current;
-    if (!el) return;
-    const P = p.current;
-    const px = P.x;
-    const py = P.y;
-    P.x += (P.tx - P.x) * 0.14;
-    P.y += (P.ty - P.y) * 0.14;
-    const vx = P.x - px;
-    const vy = P.y - py;
-    const show = active >= 0;
-    el.style.opacity = show ? 1 : 0;
-    el.style.transform = `translate(${P.x}px,${P.y}px) translate(-50%,-50%) perspective(900px) rotateY(${clamp(vx * 0.6, -18, 18)}deg) rotateX(${clamp(-vy * 0.6, -14, 14)}deg) scale(${show ? 1 : 0.85})`;
-  });
-
-  return (
-    <div
-      ref={ref}
-      aria-hidden="true"
-      className="pointer-events-none fixed left-0 top-0 z-40 aspect-[16/10] w-[clamp(280px,24vw,480px)] overflow-hidden rounded-[18px] opacity-0 shadow-[0_40px_80px_rgba(0,0,0,0.5)] transition-opacity duration-300"
-    >
-      {WORK.map((proj, i) => (
-        <img
-          key={proj.no}
-          src={proj.thumb}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-          style={{
-            opacity: active === i ? 1 : 0,
-            transform: `scale(${active === i ? 1 : 1.15})`,
-            transition: `opacity 0.45s, transform 0.8s ${SMOOTH}`,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
 
 function Work() {
   const narrow = useNarrow();
   const [hover, setHover] = useState(-1);
+
+  // 데스크톱: 호버한 프로젝트 썸네일을 3D 유리 클로버 안에 띄운다 (cloverScene 이 읽음)
+  useEffect(() => {
+    workPreview.index = narrow ? -1 : hover;
+  }, [hover, narrow]);
+  useEffect(() => () => void (workPreview.index = -1), []);
 
   return (
     <section id="work" className="site-x site-y">
@@ -153,8 +97,6 @@ function Work() {
           );
         })}
       </ul>
-
-      {!narrow && <Preview active={hover} />}
     </section>
   );
 }
