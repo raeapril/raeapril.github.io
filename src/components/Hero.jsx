@@ -24,7 +24,7 @@ function Hero({ sceneReady, revealed = true }) {
         className="site-x grid grid-cols-[minmax(0,1fr)_auto] items-end gap-x-6 gap-y-4 pb-[clamp(24px,4vh,48px)] font-mono text-xs uppercase tracking-[0.04em] text-dim min-[900px]:grid-cols-3"
         style={revealStyle(revealed)}
       >
-        <p className="col-span-2 m-0 font-sans text-[15px] normal-case leading-normal tracking-normal text-sub min-[900px]:col-span-1 min-[900px]:col-start-3 min-[900px]:row-start-1 min-[900px]:text-right min-[900px]:text-sm">
+        <p className="col-span-2 m-0 font-sans text-[15px] normal-case leading-normal tracking-normal text-sub min-[900px]:col-span-1 min-[900px]:col-start-3 min-[900px]:row-start-1 min-[900px]:text-right">
           디자인을 생동감 있는 웹으로 번역합니다.
         </p>
         <div className="flex flex-col gap-1.5 min-[900px]:col-start-1 min-[900px]:row-start-1">
@@ -33,13 +33,13 @@ function Hero({ sceneReady, revealed = true }) {
         </div>
         <span
           aria-hidden="true"
-          className="flex items-center gap-2.5 justify-self-end min-[900px]:col-start-2 min-[900px]:row-start-1 min-[900px]:justify-self-center"
+          className="flex items-center gap-3.5 text-sm justify-self-end min-[900px]:col-start-2 min-[900px]:row-start-1 min-[900px]:justify-self-center"
         >
           Scroll
           {/* 레일 위를 핑크 클로버가 굴러가며 지나간 자리를 채운다 */}
-          <span className="relative inline-block h-px w-10 bg-dim/40">
+          <span className="relative inline-block h-[1.5px] w-16 bg-dim/40">
             <span className="cue-trail absolute inset-0 bg-point" />
-            <CloverIcon className="cue-clover absolute left-0 top-1/2 h-2.5 w-2.5 text-point" />
+            <CloverIcon className="cue-clover absolute left-0 top-1/2 h-3.5 w-3.5 text-point" />
           </span>
         </span>
       </div>

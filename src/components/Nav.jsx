@@ -4,6 +4,7 @@ const LINKS = [
   { href: "#work", label: "Work" },
   { href: "#about", label: "About" },
   { href: "#skills", label: "Skills" },
+  { href: "#contact", label: "Contact" },
 ];
 
 function Nav({ revealed = true }) {
@@ -14,7 +15,7 @@ function Nav({ revealed = true }) {
     >
       <nav
         aria-label="주요 메뉴"
-        className="flex items-center gap-[clamp(12px,2vw,32px)] rounded-full border border-white/[0.08] bg-[rgba(22,22,26,0.6)] py-2 pl-5 pr-2 backdrop-blur-[16px]"
+        className="flex items-center gap-[clamp(12px,2vw,32px)] glass-bar rounded-full px-6 py-3.5"
       >
         <a href="#top" className="font-display text-lg font-extrabold tracking-[-0.02em]">
           RAE<span className="text-point">.</span>
@@ -26,12 +27,6 @@ function Nav({ revealed = true }) {
             </a>
           ))}
         </div>
-        <a
-          href="#contact"
-          className="rounded-full bg-cream px-[18px] py-2.5 text-[13px] font-semibold text-night transition-colors duration-300 hover:bg-point hover:text-night"
-        >
-          Contact
-        </a>
       </nav>
     </header>
   );
