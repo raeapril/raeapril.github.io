@@ -14,7 +14,7 @@ import clabImgMo from "../assets/clab_mo.jpg";
 import mojImgMo from "../assets/moj_mo.jpg";
 import etechhiveImgMo from "../assets/etechhive_mo.jpg";
 
-export const WORK = [
+const PROJECTS = [
   {
     no: "N°01",
     title: "[LG화학] 알지?",
@@ -79,3 +79,6 @@ export const WORK = [
     link: "https://happybean.naver.com/campaign/greencluster",
   }
 ];
+
+// 태그 문자열("WEB / 기여도 100%")을 칩 배열로
+export const WORK = PROJECTS.map((w) => ({ ...w, chips: w.tag.split(" / ") }));

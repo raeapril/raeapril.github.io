@@ -29,6 +29,16 @@
     @apply mx-auto w-full max-w-[1920px] px-[clamp(20px,3vw,64px)];
   }
 
+  /* 섹션 공통 위 여백 (섹션 사이 간격) */
+  .site-y {
+    @apply pt-[clamp(140px,14vw,260px)];
+  }
+
+  /* 섹션 제목 줄 ↔ 본문 간격 */
+  .site-head-gap {
+    @apply mb-[clamp(32px,4vw,64px)];
+  }
+
   /* 거대 영문 헤드라인 */
   .site-display {
     @apply font-display font-extrabold tracking-[-0.045em];

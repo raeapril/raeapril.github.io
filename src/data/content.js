@@ -1,22 +1,3 @@
-import { WORK as WORK_BASE } from "../data/work";
-
-// 12컬럼 그리드에서 카드별 폭 (900px 이상). Tailwind JIT 가 읽도록 클래스 문자열을 그대로 둔다.
-const SPAN_CLASS = [
-  "min-[900px]:col-span-7",
-  "min-[900px]:col-span-5",
-  "min-[900px]:col-span-5",
-  "min-[900px]:col-span-7",
-  "min-[900px]:col-span-4",
-  "min-[900px]:col-span-4",
-  "min-[900px]:col-span-4",
-];
-
-export const WORK = WORK_BASE.map((w, i) => ({
-  ...w,
-  span: SPAN_CLASS[i] ?? "min-[900px]:col-span-4",
-  chips: w.tag.split(" / "),
-}));
-
 export const ABOUT = [
   {
     no: "01",

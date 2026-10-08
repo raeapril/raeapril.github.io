@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import 'lenis/dist/lenis.css'
-import './site/site.css'
+import './styles/site.css'
 import App from './App.jsx'
 
 // 새로고침 시 브라우저의 스크롤 위치 복원을 끄고 항상 최상단에서 시작한다.

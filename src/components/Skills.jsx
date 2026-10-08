@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
-import { SKILLS } from "./data";
+import { SKILLS } from "../data/content";
 import CloverIcon from "./CloverIcon";
+import { prefersReducedMotion } from "../lib/motion";
 
 const SPEED = 60; // 마키 속도(px/s). 아랫줄은 0.7배로 반대 방향
 const LOOP = [...SKILLS, ...SKILLS]; // 두 번 이어 붙여 절반 폭마다 이음매 없이 반복
@@ -10,7 +11,7 @@ function Skills() {
   const row2 = useRef(null);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (prefersReducedMotion()) return;
     let raf = 0;
     let last = 0;
     let offset = 0;
@@ -35,8 +36,8 @@ function Skills() {
   }, []);
 
   return (
-    <section id="skills" className="pt-[clamp(140px,14vw,260px)]">
-      <div className="site-x mb-[clamp(24px,3vw,48px)] flex flex-wrap items-end justify-between gap-6">
+    <section id="skills" className="site-y">
+      <div className="site-x site-head-gap flex flex-wrap items-end justify-between gap-6">
         <h2 className="site-caption m-0 font-normal">Toolkit</h2>
         <p className="m-0 text-[15px] text-sub">다룰 수 있는 기술.</p>
       </div>

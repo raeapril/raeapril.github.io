@@ -1,4 +1,4 @@
-import { EMAIL } from "./data";
+import { EMAIL } from "../data/content";
 
 function Contact() {
   const [user, domain] = EMAIL.split("@");
@@ -7,7 +7,7 @@ function Contact() {
   return (
     <section
       id="contact"
-      className="site-x flex min-h-screen flex-col justify-between gap-16 pb-8 pt-[clamp(140px,14vw,240px)]"
+      className="site-x flex min-h-screen flex-col justify-between gap-16 site-y pb-8"
     >
       <div className="my-auto flex flex-col items-center gap-6 text-center">
         <span className="site-caption">Contact</span>
