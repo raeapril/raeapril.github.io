@@ -86,7 +86,8 @@ function Work() {
           </>
         }
       >
-        참여한 작업. 접근성 인증부터 디자인 어워드 수상까지, 퍼블리싱을 맡았던 프로젝트입니다.
+        참여한 작업. 접근성 인증부터 디자인 어워드 수상까지,  <br />  
+        퍼블리싱을 맡았던 프로젝트입니다.
       </SectionHead>
 
       <ul
@@ -115,7 +116,7 @@ function Work() {
                 }}
               >
                 <span className="font-mono text-xs text-point">{proj.no}</span>
-                <span className="min-w-0 font-display text-[clamp(26px,3.4vw,68px)] font-semibold leading-[1.02] tracking-[-0.035em] [text-wrap:pretty]">
+                <span className="type-title min-w-0 text-[clamp(26px,3.4vw,68px)] leading-[1.02] [text-wrap:pretty]">
                   {proj.title}
                 </span>
                 <img

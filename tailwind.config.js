@@ -22,8 +22,8 @@ export default {
           "system-ui",
           "sans-serif",
         ],
-        display: ['"Bricolage Grotesque"', "sans-serif"],
-        mono: ['"JetBrains Mono"', "monospace"],
+        display: ['"Bricolage Grotesque"', "Pretendard", "sans-serif"],
+        mono: ['"JetBrains Mono"', "Pretendard", "monospace"],
       },
       transitionTimingFunction: {
         smooth: "cubic-bezier(0.22, 1, 0.36, 1)",

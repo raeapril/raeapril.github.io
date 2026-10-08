@@ -333,14 +333,14 @@ function About() {
               <div className="flex flex-col gap-3 px-[clamp(8px,1vw,16px)] pb-[clamp(8px,1vw,16px)]">
                 <div className="flex items-baseline gap-3.5">
                   <span className="font-mono text-xs text-point">{item.no}</span>
-                  <h3 className="m-0 font-display text-[clamp(30px,2.6vw,52px)] font-bold leading-none tracking-[-0.04em]">
+                  <h3 className="type-title m-0 text-[clamp(30px,2.6vw,52px)] leading-none">
                     {item.title}
                   </h3>
                 </div>
                 <p className="m-0 text-[clamp(16px,1.1vw,19px)] font-semibold leading-[1.45] [text-wrap:pretty]">
                   {item.lead}
                 </p>
-                <p className="m-0 max-w-[640px] text-sm leading-[1.7] text-[#a19e98] [text-wrap:pretty]">
+                <p className="type-body m-0 leading-[1.7] [text-wrap:pretty]">
                   {item.desc}
                 </p>
               </div>

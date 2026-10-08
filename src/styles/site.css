@@ -7,6 +7,9 @@
   body {
     @apply bg-night text-cream font-sans antialiased;
     -webkit-font-smoothing: antialiased;
+    /* 한글은 어절 단위로 줄바꿈. 칸보다 긴 한 단어만 예외로 끊는다 */
+    word-break: keep-all;
+    overflow-wrap: break-word;
   }
 
   ::selection {
@@ -42,6 +45,16 @@
   /* 거대 영문 헤드라인 */
   .site-display {
     @apply font-display font-extrabold tracking-[-0.045em];
+  }
+
+  /* 섹션 안 중간 제목 (Work 프로젝트명, About 카드, Skills) */
+  .type-title {
+    @apply font-display font-semibold tracking-[-0.035em];
+  }
+
+  /* 설명 본문 */
+  .type-body {
+    @apply text-[15px] text-sub;
   }
 
   /* 모노 캡션 */

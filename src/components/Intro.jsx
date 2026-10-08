@@ -49,7 +49,7 @@ function Intro({ onDone }) {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 z-[100] flex flex-col justify-between p-[clamp(20px,3vw,64px)] font-mono text-xs uppercase tracking-[0.04em] text-dim"
+      className="pointer-events-none fixed inset-0 z-[100] flex flex-col justify-between p-[clamp(20px,3vw,64px)] site-caption"
       style={{ opacity: exit ? 0 : 1, transition: "opacity 0.6s ease 0.35s" }}
     >
       <div

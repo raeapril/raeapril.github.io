@@ -38,8 +38,11 @@ function Skills() {
   return (
     <section id="skills" className="site-y">
       <div className="site-x site-head-gap flex flex-wrap items-end justify-between gap-6">
-        <h2 className="site-caption m-0 font-normal">Toolkit</h2>
-        <p className="m-0 text-[15px] text-sub">다룰 수 있는 기술.</p>
+        {/* 아래 마키가 큰 글자 역할을 하므로 제목은 작은 라벨로 둔다 */}
+        <h2 className="type-title m-0 text-[clamp(24px,2.4vw,40px)] leading-none text-cream">
+          Skills
+        </h2>
+        <p className="type-body m-0">다룰 수 있는 기술.</p>
       </div>
 
       {/* 스크린리더용 목록. 아래 마키는 장식이라 숨긴다 */}
@@ -59,7 +62,7 @@ function Skills() {
           {LOOP.map((s, i) => (
             <span
               key={i}
-              className="flex items-center gap-[clamp(20px,2vw,40px)] whitespace-nowrap pr-[clamp(20px,2vw,40px)] font-display text-[clamp(48px,7vw,140px)] font-extrabold leading-none tracking-[-0.04em]"
+              className="flex items-center gap-[clamp(20px,2vw,40px)] whitespace-nowrap pr-[clamp(20px,2vw,40px)] font-display text-[clamp(48px,7vw,140px)] font-extrabold leading-none tracking-[-0.045em]"
             >
               {s.name}
               <CloverIcon className="h-[0.4em] w-[0.4em] text-point" />
@@ -69,7 +72,7 @@ function Skills() {
         <div ref={row2} className="flex w-max will-change-transform">
           {LOOP.map((s, i) => (
             <span key={i} className="flex items-baseline gap-3.5 whitespace-nowrap pr-[clamp(32px,3vw,64px)]">
-              <span className="font-display text-[clamp(28px,3vw,56px)] font-normal tracking-[-0.03em] text-transparent [-webkit-text-stroke:1px_#8d8a85]">
+              <span className="font-display text-[clamp(28px,3vw,56px)] font-normal tracking-[-0.035em] text-transparent [-webkit-text-stroke:1px_#8d8a85]">
                 {s.name}
               </span>
               <span className="text-sm text-dim">{s.desc}</span>
