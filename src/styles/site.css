@@ -53,4 +53,56 @@
   .glass {
     @apply border border-white/[0.08] backdrop-blur-[20px];
   }
+
+  /* 히어로 Scroll 큐: 클로버가 40px 레일을 한 바퀴 구르며 지나가고, 지나간 자리가 핑크로 차올랐다 사라진다 */
+  .cue-clover {
+    transform: translate(-50%, -50%);
+    animation: cue-roll 2.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+  .cue-trail {
+    transform-origin: left;
+    transform: scaleX(0);
+    animation: cue-trail 2.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+}
+
+@keyframes cue-roll {
+  0% {
+    transform: translate(-50%, -50%) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  12%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translateX(40px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes cue-trail {
+  0% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  80% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+/* 동작 줄이기: 클로버는 레일 가운데에 멈춰 있고 선은 채우지 않는다 */
+@media (prefers-reduced-motion: reduce) {
+  .cue-clover {
+    animation: none;
+    transform: translate(-50%, -50%) translateX(20px);
+  }
+  .cue-trail {
+    animation: none;
+  }
 }

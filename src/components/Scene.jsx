@@ -18,16 +18,13 @@ function getAnchors() {
  * 화면 전체에 고정되는 WebGL 배경. three.js 는 별도 청크로 늦게 불러오고,
  * 첫 프레임을 그리면 onReady 로 알려 HTML 대체 헤드라인을 숨기게 한다.
  * introStart: 인트로 로더가 끝난 시각(performance.now 기준). 그 전까지 클로버는 작게 회전만 한다.
- * onTextLayout: 배경 타이포를 다시 그릴 때마다 { bottom, left }(화면 px) 를 알려준다.
  */
-function Scene({ onReady, onTextLayout, introStart = null, autoRotate = true }) {
+function Scene({ onReady, introStart = null, autoRotate = true }) {
   const hostRef = useRef(null);
   const onReadyRef = useRef(onReady);
-  const onTextLayoutRef = useRef(onTextLayout);
   const introRef = useRef(introStart);
   useEffect(() => {
     onReadyRef.current = onReady;
-    onTextLayoutRef.current = onTextLayout;
     introRef.current = introStart;
   });
 
@@ -70,10 +67,7 @@ function Scene({ onReady, onTextLayout, introStart = null, autoRotate = true }) 
         return;
       }
       if (disposed || !hostRef.current) return;
-      const s = mod.createCloverScene(hostRef.current, {
-        autoRotate,
-        onTextLayout: (layout) => onTextLayoutRef.current?.(layout),
-      });
+      const s = mod.createCloverScene(hostRef.current, { autoRotate });
       // 캔버스에 그리는 타이포가 대체 폰트로 찍히지 않도록 웹폰트 로드를 기다린다
       try {
         await Promise.all([

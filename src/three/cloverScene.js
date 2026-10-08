@@ -78,7 +78,7 @@ function studioEnvironment(renderer) {
  * 고정 배경 캔버스: 뒤쪽 평면에 "WEB PUBLISHER" 타이포를 그리고,
  * 그 앞에서 유리 클로버가 스크롤 구간마다 위치를 옮겨 다닌다.
  */
-export function createCloverScene(host, { autoRotate = true, onTextLayout } = {}) {
+export function createCloverScene(host, { autoRotate = true } = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -178,9 +178,6 @@ export function createCloverScene(host, { autoRotate = true, onTextLayout } = {}
     ctx.fillText(`(PORTFOLIO — ${new Date().getFullYear()})`, tc.width * 0.96, y1 - fs * 0.6);
     ctx.textAlign = "left";
     textTex.needsUpdate = true;
-
-    // 화면 기준(px) "PUBLISHER" 베이스라인 위치·왼쪽 끝 → HTML 문구를 타이포 바로 아래에 붙일 때 사용
-    onTextLayout?.({ bottom: (y2 / tc.height) * S.vh, left: (x / tc.width) * S.vw });
   }
 
   function resize() {
