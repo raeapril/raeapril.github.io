@@ -15,9 +15,9 @@ const KEYFRAMES = [
 ];
 
 // 원 4개를 겹친 네잎 클로버 실루엣 (바깥 반경 = d + r = 1.06)
-const CLOVER_D = 0.5;
-const CLOVER_R = 0.56;
-function cloverShape() {
+export const CLOVER_D = 0.5;
+export const CLOVER_R = 0.56;
+export function cloverShape() {
   const d = CLOVER_D;
   const r = CLOVER_R;
   const s = Math.sqrt(2 * r * r - d * d);
@@ -35,7 +35,7 @@ function cloverShape() {
 }
 
 // 클로버 실루엣을 두께감 있게 압출한다.
-function cloverGeometry() {
+export function cloverGeometry() {
   const g = new THREE.ExtrudeGeometry(cloverShape(), {
     depth: 0.12,
     bevelEnabled: true,
@@ -50,7 +50,7 @@ function cloverGeometry() {
 }
 
 // 유리 굴절이 살아나도록 컬러 라이트 패널로 만든 가짜 스튜디오 환경맵
-function studioEnvironment(renderer) {
+export function studioEnvironment(renderer) {
   const env = new THREE.Scene();
   env.add(
     new THREE.Mesh(

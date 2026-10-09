@@ -43,10 +43,8 @@ function Work() {
           return (
             <li key={proj.no} onPointerEnter={() => setHover(i)} className="border-t border-white/10">
               <a
-                href={proj.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`${proj.title} 사이트 새 탭으로 열기`}
+                href={proj.href}
+                aria-label={`${proj.title} 프로젝트 상세 보기`}
                 onFocus={() => setHover(i)}
                 onBlur={() => setHover(-1)}
                 // 모바일: 번호 | 제목 | 화살표 한 줄 + 아래로 썸네일·설명 (2~3열 걸침)

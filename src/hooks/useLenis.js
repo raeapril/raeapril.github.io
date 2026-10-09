@@ -6,6 +6,8 @@ import { prefersReducedMotion } from "../lib/motion";
  * Lenis 스무스 스크롤 + 해시 앵커(#work 등) 부드럽게 이동.
  * 3D 배경은 window.scrollY 를 매 프레임 읽으므로 별도 동기화가 필요 없다.
  * paused 동안(인트로 로더)은 스크롤을 멈춘다 — Lenis 는 body overflow 잠금을 무시하기 때문.
+ * 주소에 섹션 해시(/#work)가 붙어 들어오면 멈춤이 풀릴 때 그 섹션으로 이동한다(상세 페이지의 "← Work").
+ * Lenis 인스턴스 ref 를 돌려준다(동작 줄이기면 비어 있음).
  */
 export function useLenis(paused = false) {
   const lenisRef = useRef(null);
@@ -44,7 +46,11 @@ export function useLenis(paused = false) {
   useEffect(() => {
     const lenis = lenisRef.current;
     if (!lenis) return;
-    if (paused) lenis.stop();
-    else lenis.start();
+    if (paused) return lenis.stop();
+    lenis.start();
+    const hash = window.location.hash;
+    if (/^#[\w-]+$/.test(hash) && document.querySelector(hash)) lenis.scrollTo(hash);
   }, [paused]);
+
+  return lenisRef;
 }
