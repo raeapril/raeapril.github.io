@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { WORK } from "../data/work";
+import CloverIcon from "../components/CloverIcon";
 import { useLenis } from "../hooks/useLenis";
 import { useFrame } from "../hooks/useFrame";
 import { clamp, ease } from "../lib/math";
@@ -14,14 +15,41 @@ const indexFromHash = () => {
 // 클로버는 자리(slot) 폭의 이만큼만 채운다
 const CLOVER_SCALE = 0.7;
 
+// 섹션 사이 간격 (Screens · Overview · Next 공통)
+const SECTION_GAP = "pt-[clamp(80px,8.5vw,152px)]";
+
+// 섹션 간격의 절반 — 구분선을 그 가운데에 둘 때 위아래로 나눠 쓴다
+const HALF_GAP = "pt-[clamp(40px,4.25vw,76px)]";
+
+/**
+ * 핑크 클로버 3개 + 옅어지는 선. 기본은 클로버가 왼쪽(선은 오른쪽으로 옅어짐),
+ * reverse 면 선이 먼저 나오고 클로버가 오른쪽 끝에 온다.
+ */
+function Divider({ reverse = false }) {
+  return (
+    <div aria-hidden="true" className={`flex items-center gap-3 ${reverse ? "flex-row-reverse" : ""} ${HALF_GAP}`}>
+      <span className="flex shrink-0 items-center gap-1.5">
+        {[0, 1, 2].map((i) => (
+          <CloverIcon key={i} className="h-3.5 w-3.5 text-point" />
+        ))}
+      </span>
+      <span
+        className={`h-px flex-1 from-point via-point/50 to-white/[0.08] ${
+          reverse ? "bg-gradient-to-l" : "bg-gradient-to-r"
+        }`}
+      />
+    </div>
+  );
+}
+
 const MEDIA_RADIUS = "rounded-[clamp(16px,1.8vw,28px)]";
 const SECTION_TITLE = "site-display m-0 text-[clamp(40px,5.6vw,104px)] leading-[0.9]";
 const LABEL = "font-mono text-xs uppercase tracking-[0.04em] text-point";
 
 /** 이미지 위 왼쪽 아래에 붙는 유리 캡션 */
-function ShotCaption({ n, children }) {
+function ShotCaption({ n, children, className = "" }) {
   return (
-    <figcaption className="pointer-events-none absolute inset-x-4 bottom-4 flex">
+    <figcaption className={`pointer-events-none absolute inset-x-4 bottom-4 flex ${className}`}>
       <span
         className="flex items-center gap-2.5 rounded-full px-3.5 py-[9px] font-mono text-[11px] uppercase tracking-[0.04em] text-cream backdrop-blur-[14px] backdrop-saturate-[1.6]"
         style={{
@@ -39,7 +67,7 @@ function ShotCaption({ n, children }) {
 
 function MetaItem({ k, children }) {
   return (
-    <div className="flex flex-col gap-3 border-b border-white/10 py-7 pr-6">
+    <div className="flex flex-col gap-3 pr-6 pt-6">
       <dt className="site-caption">{k}</dt>
       <dd className="m-0 flex flex-col gap-3.5">{children}</dd>
     </div>
@@ -63,6 +91,7 @@ function ProjectDetail() {
   const p = WORK[index];
   const next = WORK[(index + 1) % WORK.length];
   const hasOverview = !!(p.overview || p.process.length);
+  const appScreens = p.screens.every((sc) => sc.label === "Mobile");
 
   // "다음 프로젝트" 로 해시가 바뀌면 같은 페이지에서 내용만 바꾸고 맨 위로, 클로버는 한 바퀴
   useEffect(() => {
@@ -78,6 +107,7 @@ function ProjectDetail() {
 
   useEffect(() => {
     document.title = `${p.name} — 신미래 포트폴리오`;
+    clover.current?.setTint(p.tint);
   }, [p]);
 
   useEffect(() => {
@@ -85,6 +115,7 @@ function ProjectDetail() {
     import("../three/followClover").then(({ createFollowClover }) => {
       if (dead) return;
       clover.current = createFollowClover(canvasHost.current);
+      clover.current.setTint(WORK[indexFromHash()].tint);
     });
     return () => {
       dead = true;
@@ -173,7 +204,7 @@ function ProjectDetail() {
               className="aspect-square w-full max-w-[320px] justify-self-center max-[699px]:max-w-[200px]"
             />
           </div>
-          <div className="mt-[clamp(24px,3vw,48px)] flex flex-wrap items-center justify-between gap-6 border-t border-white/[0.14] pt-6">
+          <div className="mt-[clamp(24px,3vw,48px)] flex flex-wrap items-center justify-between gap-6">
             <p className="type-body m-0 max-w-[480px] leading-[1.7] [text-wrap:pretty]">
               {p.client} {p.name} — {p.role}. {p.desc}.
             </p>
@@ -205,7 +236,7 @@ function ProjectDetail() {
       </section>
 
       <main className="site-x">
-        <dl className="m-0 mt-[clamp(24px,3vw,48px)] grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] border-t border-white/10">
+        <dl className="m-0 mt-[clamp(24px,3vw,48px)] grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))]">
           <MetaItem k="Role">
             <span className={META_VALUE}>{p.role}</span>
           </MetaItem>
@@ -228,9 +259,11 @@ function ProjectDetail() {
           </MetaItem>
         </dl>
 
-        {/* Screens: 모바일 화면 + 대표 화면 */}
-        <section className="pt-[clamp(96px,10vw,180px)]">
-          <div className="mb-[clamp(24px,3vw,48px)] flex items-end justify-between gap-6">
+        <Divider />
+
+        {/* Screens: 프로젝트별 화면 (기본은 모바일 + 웹, 앱은 앱 화면 여러 장) */}
+        <section className={HALF_GAP}>
+          <div className="mb-[clamp(24px,3vw,48px)] flex items-start justify-between gap-6">
             <div className="flex flex-col gap-4">
               <span className={LABEL}>(Screens)</span>
               <h2 className={SECTION_TITLE}>
@@ -239,41 +272,61 @@ function ProjectDetail() {
             </div>
             <div ref={slotScreens} className="aspect-square w-[clamp(96px,10vw,180px)] shrink-0" />
           </div>
-          <div className="flex flex-wrap gap-[clamp(12px,1.2vw,20px)]">
-            <figure
-              className={`group relative m-0 aspect-[4/5] min-w-0 flex-[4_1_300px] overflow-hidden bg-[#151517] ${MEDIA_RADIUS}`}
-            >
-              <img
-                src={p.thumbMobile}
-                alt={`${p.name} 모바일 화면`}
-                loading="lazy"
-                className="block h-full w-full object-cover transition-transform duration-[1200ms] ease-smooth group-hover:scale-[1.04]"
-              />
-              <ShotCaption n="01">Mobile</ShotCaption>
-            </figure>
-            <figure
-              className={`group relative m-0 aspect-square min-w-0 flex-[5_1_375px] overflow-hidden bg-[#151517] ${MEDIA_RADIUS}`}
-            >
-              <img
-                src={p.thumbClover}
-                alt={`${p.name} 대표 화면`}
-                loading="lazy"
-                className="block h-full w-full object-cover transition-transform duration-[1200ms] ease-smooth group-hover:scale-[1.04]"
-              />
-              <ShotCaption n="02">Key visual</ShotCaption>
-            </figure>
-          </div>
+          {appScreens ? (
+            // 앱 화면만 있는 프로젝트: 같은 크기의 세로 화면을 나란히
+            <div className="grid grid-cols-3 gap-[clamp(8px,1.2vw,20px)]">
+              {p.screens.map((sc, i) => (
+                <figure
+                  key={sc.src}
+                  className={`group relative m-0 aspect-[665/1302] min-w-0 overflow-hidden bg-[#151517] ${MEDIA_RADIUS}`}
+                >
+                  <img
+                    src={sc.src}
+                    alt={`${p.name} 앱 화면 ${i + 1}`}
+                    loading="lazy"
+                    className="block h-full w-full object-cover object-top transition-transform duration-[1200ms] ease-smooth group-hover:scale-[1.04]"
+                  />
+                  {/* 좁은 화면에선 칸이 작아 캡션이 앱 화면을 가리므로 숨긴다 */}
+                  <ShotCaption n={String(i + 1).padStart(2, "0")} className="max-[699px]:hidden">
+                    {sc.label}
+                  </ShotCaption>
+                </figure>
+              ))}
+            </div>
+          ) : (
+            // 모바일 + 웹: 700px 이상에선 칸 폭을 이미지 비율(ratio)대로 나눠 두 칸 높이가 같고 잘리지 않게
+            <div className="flex flex-col gap-[clamp(12px,1.2vw,20px)] min-[700px]:flex-row">
+              {p.screens.map((sc, i) => {
+                const mobile = sc.label === "Mobile";
+                return (
+                  <figure
+                    key={sc.src}
+                    style={{ "--r": sc.ratio }}
+                    className={`group relative m-0 aspect-[var(--r)] min-w-0 overflow-hidden bg-[#151517] min-[700px]:flex-[var(--r)_1_0%] ${MEDIA_RADIUS}`}
+                  >
+                    <img
+                      src={sc.src}
+                      alt={`${p.name} ${mobile ? "모바일" : "웹"} 화면`}
+                      loading="lazy"
+                      className="block h-full w-full object-cover object-top transition-transform duration-[1200ms] ease-smooth group-hover:scale-[1.04]"
+                    />
+                    <ShotCaption n={String(i + 1).padStart(2, "0")}>{sc.label}</ShotCaption>
+                  </figure>
+                );
+              })}
+            </div>
+          )}
         </section>
 
         {/* Overview: 개요 + 키워드 + 맡은 일 */}
         {hasOverview && (
-          <section className="flex flex-wrap gap-[clamp(24px,4vw,80px)] pt-[clamp(96px,10vw,180px)]">
+          <section className={`flex flex-wrap gap-[clamp(24px,4vw,80px)] ${SECTION_GAP}`}>
             <div className="flex flex-[1_1_240px] flex-col gap-4">
               <span className={LABEL}>(Stack &amp; Keywords)</span>
               <h2 className={SECTION_TITLE}>
                 Overview<span className="text-point">.</span>
               </h2>
-              <div ref={slotOverview} className="mt-[clamp(16px,3vw,48px)] aspect-square w-[min(100%,280px)]" />
+              <div ref={slotOverview} className="mt-[clamp(8px,1.5vw,24px)] aspect-square w-[min(100%,160px)]" />
             </div>
             <div className="flex min-w-0 flex-[2_1_520px] flex-col gap-8">
               <p className="m-0 text-[clamp(22px,2.4vw,40px)] font-semibold leading-[1.35] tracking-[-0.03em] [text-wrap:pretty]">
@@ -281,14 +334,14 @@ function ProjectDetail() {
               </p>
               <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
                 {p.features.map((f) => (
-                  <li key={f} className="rounded-full border border-white/[0.14] px-4 py-2.5 text-sm text-sub">
+                  <li key={f} className="rounded-full bg-white/[0.06] px-4 py-2.5 text-sm text-sub">
                     {f}
                   </li>
                 ))}
               </ul>
-              <ol className="m-0 mt-4 grid list-none grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-x-[clamp(24px,3vw,56px)] p-0">
+              <ol className="m-0 mt-4 grid list-none grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-x-[clamp(24px,3vw,56px)] gap-y-7 p-0">
                 {p.process.map((s) => (
-                  <li key={s.n} className="flex flex-col gap-3 border-t border-white/10 py-7">
+                  <li key={s.n} className="flex flex-col gap-3">
                     <span className="font-mono text-xs text-point">{s.n}</span>
                     <span className="type-title text-[clamp(22px,2vw,32px)] leading-[1.15]">{s.t}</span>
                     <span className="type-body leading-[1.7] [text-wrap:pretty]">{s.d}</span>
@@ -299,17 +352,19 @@ function ProjectDetail() {
           </section>
         )}
 
+        <Divider reverse />
+
         {/* 다음 프로젝트: 썸네일 왼쪽 위 모서리에 클로버가 걸터앉는다 */}
-        <section className="mt-[clamp(120px,12vw,220px)] border-t border-white/10">
+        <section className={HALF_GAP}>
           <a
             href={`#${next.id}`}
             onPointerEnter={() => clover.current?.setHover(true)}
             onPointerLeave={() => clover.current?.setHover(false)}
-            className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-[clamp(20px,3vw,56px)] py-[clamp(40px,5vw,88px)] transition-colors duration-300"
+            className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-[clamp(20px,3vw,56px)] pb-[clamp(32px,4vw,64px)] transition-colors duration-300"
           >
             <div className="flex min-w-0 flex-col gap-5">
               <span className="site-caption">Next Project — {next.no}</span>
-              <span className="site-display text-[clamp(44px,8vw,160px)] leading-[0.9]">
+              <span className="site-display text-[clamp(36px,4.8vw,88px)] leading-[0.9]">
                 {next.name}
                 <span className="text-point">.</span>
               </span>
@@ -317,7 +372,7 @@ function ProjectDetail() {
                 {next.client} · {next.desc}
               </span>
             </div>
-            <div className="relative w-[clamp(140px,20vw,320px)] shrink-0">
+            <div className="relative w-[clamp(110px,13vw,220px)] shrink-0">
               <div className={`aspect-square overflow-hidden bg-[#151517] ${MEDIA_RADIUS}`}>
                 <img
                   src={next.thumbClover}
@@ -336,7 +391,7 @@ function ProjectDetail() {
       </main>
 
       <footer className="site-x pb-8 pt-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.08] pt-6 font-mono text-xs text-dim">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-6 font-mono text-xs text-dim">
           <span>© 2026 RAE APRIL. All rights reserved.</span>
           <span>Web Publisher · Seoul, KR</span>
           <a href="/#work">All Work ↗</a>

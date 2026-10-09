@@ -110,6 +110,22 @@ export function createFollowClover(host, { tint = "pink", autoSpin = true } = {}
   const setHover = (on) => (S.hover = on ? 1 : 0);
   // 프로젝트가 바뀌면 한 바퀴
   const spin = () => (S.flip = 1);
+  // 프로젝트 대표 색: 유리 속 배경판과 유리 두께 색에 은은하게 섞는다. 바뀔 때는 매 프레임 조금씩 따라간다
+  const BACKDROP_BASE = new THREE.Color(0x2a2a30);
+  const ATTEN_BASE = new THREE.Color(TINTS[tint] ?? TINTS.pink);
+  const tintTarget = { backdrop: BACKDROP_BASE.clone(), atten: ATTEN_BASE.clone() };
+  /** 대표 색(css hex). 비우면 기본 색으로 */
+  function setTint(hex) {
+    if (!hex) {
+      tintTarget.backdrop.copy(BACKDROP_BASE);
+      tintTarget.atten.copy(ATTEN_BASE);
+      return;
+    }
+    const c = new THREE.Color(hex);
+    tintTarget.backdrop.copy(BACKDROP_BASE).lerp(c, 0.25);
+    tintTarget.atten.set(0xffffff).lerp(c, 0.25);
+  }
+
   function setOpts({ tint: tn, autoSpin: as } = {}) {
     if (tn) glass.attenuationColor.set(TINTS[tn] ?? TINTS.pink);
     if (as !== undefined) S.auto = as;
@@ -120,6 +136,8 @@ export function createFollowClover(host, { tint = "pink", autoSpin = true } = {}
   const t0 = performance.now();
   const loop = () => {
     raf = requestAnimationFrame(loop);
+    backdrop.material.color.lerp(tintTarget.backdrop, 0.05);
+    glass.attenuationColor.lerp(tintTarget.atten, 0.05);
     const t = (performance.now() - t0) / 1000;
     const y = window.scrollY;
     // 처음 뜰 때 0 → 1 로 커지며 빠르게 돌다 멈춘다
@@ -174,5 +192,5 @@ export function createFollowClover(host, { tint = "pink", autoSpin = true } = {}
     host.style.mixBlendMode = "";
   }
 
-  return { setTarget, setHover, spin, setOpts, dispose };
+  return { setTarget, setHover, spin, setOpts, setTint, dispose };
 }
