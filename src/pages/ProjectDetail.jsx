@@ -249,12 +249,15 @@ function ProjectDetail() {
             <span className={META_VALUE}>{p.platform}</span>
           </MetaItem>
           <MetaItem k="Contribution">
-            <span className={META_VALUE}>
-              {p.contrib}
-              <span className="text-point">%</span>
-            </span>
-            <span className="block h-0.5 overflow-hidden rounded-sm bg-dim/25">
-              <span className="block h-full rounded-sm bg-point" style={{ width: `${p.contrib}%` }} />
+            {/* 모바일에선 막대가 아래 구분선과 겹쳐 보이지 않게 퍼센트 옆에 붙인다 */}
+            <span className="flex flex-col gap-3.5 max-[699px]:flex-row max-[699px]:items-center max-[699px]:gap-4">
+              <span className={`${META_VALUE} shrink-0`}>
+                {p.contrib}
+                <span className="text-point">%</span>
+              </span>
+              <span className="block h-0.5 overflow-hidden rounded-sm bg-dim/25 max-[699px]:flex-1">
+                <span className="block h-full rounded-sm bg-point" style={{ width: `${p.contrib}%` }} />
+              </span>
             </span>
           </MetaItem>
         </dl>
@@ -273,12 +276,14 @@ function ProjectDetail() {
             <div ref={slotScreens} className="aspect-square w-[clamp(96px,10vw,180px)] shrink-0" />
           </div>
           {appScreens ? (
-            // 앱 화면만 있는 프로젝트: 같은 크기의 세로 화면을 나란히
-            <div className="grid grid-cols-3 gap-[clamp(8px,1.2vw,20px)]">
+            // 앱 화면만 있는 프로젝트: 700px 이상은 같은 크기로 나란히, 모바일은 두 번째 장을 빼고 세로로
+            <div className="grid grid-cols-1 gap-[clamp(12px,1.2vw,20px)] min-[700px]:grid-cols-3">
               {p.screens.map((sc, i) => (
                 <figure
                   key={sc.src}
-                  className={`group relative m-0 aspect-[665/1302] min-w-0 overflow-hidden bg-[#151517] ${MEDIA_RADIUS}`}
+                  className={`group relative m-0 aspect-[665/1302] min-w-0 overflow-hidden bg-[#151517] ${MEDIA_RADIUS} ${
+                    i === 1 ? "max-[699px]:hidden" : ""
+                  }`}
                 >
                   <img
                     src={sc.src}
@@ -286,10 +291,7 @@ function ProjectDetail() {
                     loading="lazy"
                     className="block h-full w-full object-cover object-top transition-transform duration-[1200ms] ease-smooth group-hover:scale-[1.04]"
                   />
-                  {/* 좁은 화면에선 칸이 작아 캡션이 앱 화면을 가리므로 숨긴다 */}
-                  <ShotCaption n={String(i + 1).padStart(2, "0")} className="max-[699px]:hidden">
-                    {sc.label}
-                  </ShotCaption>
+                  <ShotCaption n={String(i + 1).padStart(2, "0")}>{sc.label}</ShotCaption>
                 </figure>
               ))}
             </div>
