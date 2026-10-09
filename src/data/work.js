@@ -1,3 +1,5 @@
+import { pad2 } from "../lib/math";
+
 import rzImg from "../assets/rz.jpg";
 import bankitImg from "../assets/bankit.jpg";
 import jigutImg from "../assets/jigu.jpg";
@@ -16,7 +18,7 @@ import clabImgSq from "../assets/clab_sq.jpg";
 import mojImgSq from "../assets/moj_sq.jpg";
 import etechhiveImgSq from "../assets/etechhive_sq.jpg";
 
-// 상세 페이지 Screens 전용 이미지 (없으면 대표 정사각 썸네일 한 칸)
+// 상세 페이지 Screens 이미지. ratio = 이미지 가로/세로 (칸 비율·높이 맞춤에 씀)
 import rzDetail01 from "../assets/rz_detail_01.jpg";
 import rzDetail02 from "../assets/rz_detail_02.jpg";
 import rzDetail03 from "../assets/rz_detail_03.jpg";
@@ -44,11 +46,12 @@ const PROJECTS = [
     desc: "앱 접근성 인증 마크 획득",
     thumb: rzImg,
     thumbClover: rzImgSq,
-    // 앱이라 웹 화면 대신 앱 화면 3장
+    // 앱이라 웹 화면 대신 같은 크기의 앱 화면 3장을 격자로. 모바일에선 두 번째 장을 뺀다
+    screensLayout: "app",
     screens: [
-      { src: rzDetail01, label: "Mobile" },
-      { src: rzDetail02, label: "Mobile" },
-      { src: rzDetail03, label: "Mobile" },
+      { src: rzDetail01, label: "Mobile", ratio: 665 / 1302 },
+      { src: rzDetail02, label: "Mobile", ratio: 665 / 1302, hideOnMobile: true },
+      { src: rzDetail03, label: "Mobile", ratio: 665 / 1302 },
     ],
     link: "https://play.google.com/store/apps/details?id=com.lgchem.rz",
     period: "2024.07 ~ 2024.10",
@@ -70,7 +73,6 @@ const PROJECTS = [
     desc: "웹/앱 접근성 인증 마크 획득",
     thumb: bankitImg,
     thumbClover: bankitImgSq,
-    // ratio = 이미지 가로/세로 (두 칸 높이를 맞추는 데 씀)
     screens: [
       { src: bankitDetail01, label: "Mobile", ratio: 665 / 1159 },
       { src: bankitDetail02, label: "Web", ratio: 1920 / 2488 },
@@ -97,7 +99,7 @@ const PROJECTS = [
     thumbClover: jigutImgSq,
     screens: [
       { src: jiguDetail01, label: "Mobile", ratio: 665 / 1131 },
-      { src: jiguDetail02, label: "Web", ratio: 1920 / 2772 },
+      { src: jiguDetail02, label: "Web", ratio: 1920 / 2488 },
     ],
     link: "https://jigutoktok.causeworks.kr/",
     period: "2023.10 ~ 2023.11",
@@ -207,20 +209,16 @@ const PROJECTS = [
   },
 ];
 
-const pad2 = (n) => String(n).padStart(2, "0");
-
 // 목록(Work)·상세(project.html) 공통으로 쓰는 파생 필드를 붙인다
 export const WORK = PROJECTS.map((w, i) => ({
   ...w,
   no: `N°${pad2(i + 1)}`,
-  title: `[${w.client.split(" · ")[0]}] ${w.name}`,
+  title: `[${w.client}] ${w.name}`,
   chips: [w.platform, `기여도 ${w.contrib}%`],
   href: `/project.html#${w.id}`,
   overview: w.overview ?? "",
   features: w.features ?? [],
   process: (w.process ?? []).map((s, j) => ({ ...s, n: pad2(j + 1) })),
-  // 상세 Screens 칸들. 따로 정하지 않으면 모바일(세로) + 웹(정사각) 두 칸
-  screens: w.screens ?? [
-    { src: w.thumbClover, label: "Web", ratio: 1 },
-  ],
+  // 상세 Screens 칸들. 따로 정하지 않으면 대표 정사각 썸네일 한 칸
+  screens: w.screens ?? [{ src: w.thumbClover, label: "Web", ratio: 1 }],
 }));

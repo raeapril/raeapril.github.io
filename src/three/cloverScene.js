@@ -15,9 +15,9 @@ const KEYFRAMES = [
 ];
 
 // 원 4개를 겹친 네잎 클로버 실루엣 (바깥 반경 = d + r = 1.06)
-export const CLOVER_D = 0.5;
-export const CLOVER_R = 0.56;
-export function cloverShape() {
+const CLOVER_D = 0.5;
+const CLOVER_R = 0.56;
+function cloverShape() {
   const d = CLOVER_D;
   const r = CLOVER_R;
   const s = Math.sqrt(2 * r * r - d * d);
@@ -81,6 +81,47 @@ export function studioEnvironment(renderer) {
   return tex;
 }
 
+/** 메인·상세 클로버가 함께 쓰는 유리 재질 */
+export function createGlassMaterial() {
+  return new THREE.MeshPhysicalMaterial({
+    color: 0xffffff,
+    metalness: 0,
+    roughness: 0.06,
+    transmission: 1,
+    thickness: 1.4,
+    ior: 1.42,
+    iridescence: 0.7,
+    iridescenceIOR: 1.25,
+    iridescenceThicknessRange: [120, 480],
+    clearcoat: 1,
+    clearcoatRoughness: 0.05,
+    attenuationColor: new THREE.Color(0xffd9df),
+    attenuationDistance: 2.4,
+    specularIntensity: 1,
+    envMapIntensity: 1.3,
+  });
+}
+
+/** 클로버 둘레를 도는 구슬 3개 (가운데 것만 유리). 재질은 함께 돌려줘 dispose 할 수 있게 한다 */
+export function createOrbs(parent, glass) {
+  const chrome = new THREE.MeshPhysicalMaterial({ color: 0xe8b4bc, metalness: 1, roughness: 0.18, clearcoat: 1 });
+  const orbs = [0.17, 0.11, 0.07].map((r, i) => {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(r, 48, 32), i === 1 ? glass : chrome);
+    parent.add(m);
+    return m;
+  });
+  return { orbs, chrome };
+}
+
+/** 구슬을 시간에 따라 궤도 위에 놓는다 */
+export function placeOrbs(orbs, time) {
+  orbs.forEach((o, n) => {
+    const ang = time * (0.5 + n * 0.22) + n * 2.1;
+    const rad = 1.55 + n * 0.28;
+    o.position.set(Math.cos(ang) * rad, Math.sin(ang * 1.3) * 0.5 + (n - 1) * 0.3, Math.sin(ang) * rad * 0.6);
+  });
+}
+
 /**
  * 고정 배경 캔버스: 뒤쪽 평면에 "WEB PUBLISHER" 타이포를 그리고,
  * 그 앞에서 유리 클로버가 스크롤 구간마다 위치를 옮겨 다닌다.
@@ -101,39 +142,13 @@ export function createCloverScene(host, { autoRotate = true, thumbs = [] } = {})
   cam.position.set(0, 0, 6);
   scene.environment = studioEnvironment(renderer);
 
-  const glassMat = new THREE.MeshPhysicalMaterial({
-    color: 0xffffff,
-    metalness: 0,
-    roughness: 0.06,
-    transmission: 1,
-    thickness: 1.4,
-    ior: 1.42,
-    iridescence: 0.7,
-    iridescenceIOR: 1.25,
-    iridescenceThicknessRange: [120, 480],
-    clearcoat: 1,
-    clearcoatRoughness: 0.05,
-    attenuationColor: new THREE.Color(0xffd9df),
-    attenuationDistance: 2.4,
-    specularIntensity: 1,
-    envMapIntensity: 1.3,
-  });
+  const glassMat = createGlassMaterial();
   const clover = new THREE.Mesh(cloverGeometry(), glassMat);
   const pivot = new THREE.Group();
   pivot.add(clover);
   scene.add(pivot);
 
-  const chrome = new THREE.MeshPhysicalMaterial({
-    color: 0xe8b4bc,
-    metalness: 1,
-    roughness: 0.18,
-    clearcoat: 1,
-  });
-  const orbs = [0.17, 0.11, 0.07].map((r, i) => {
-    const m = new THREE.Mesh(new THREE.SphereGeometry(r, 48, 32), i === 1 ? glassMat : chrome);
-    pivot.add(m);
-    return m;
-  });
+  const { orbs, chrome } = createOrbs(pivot, glassMat);
 
   // ── 클로버 안 썸네일 ──
   // 유리 바로 뒤에 클로버 모양으로 자른 썸네일 판을 두면, 유리를 통해 굴절돼 "썸네일 위에 유리가 얹힌" 느낌이 난다.
@@ -427,17 +442,9 @@ export function createCloverScene(host, { autoRotate = true, thumbs = [] } = {})
     U.uFade.value = k;
     thumb.visible = k > 0.002;
 
-    orbs.forEach((o, n) => {
-      const ang = time * (0.5 + n * 0.22) + n * 2.1;
-      const rad = 1.55 + n * 0.28;
-      o.position.set(
-        Math.cos(ang) * rad,
-        Math.sin(ang * 1.3) * 0.5 + (n - 1) * 0.3,
-        Math.sin(ang) * rad * 0.6
-      );
-      // 미리보기 중에는 주변 구슬을 숨겨 덜 산만하게
-      o.scale.setScalar(Math.max(0.001, 1 - k));
-    });
+    placeOrbs(orbs, time);
+    // 미리보기 중에는 주변 구슬을 숨겨 덜 산만하게
+    orbs.forEach((o) => o.scale.setScalar(Math.max(0.001, 1 - k)));
 
     renderer.render(scene, cam);
   }

@@ -17,7 +17,7 @@ function App() {
     prefersReducedMotion() ? performance.now() - 5000 : null
   );
   const revealed = introStart !== null;
-  useLenis(!revealed);
+  useLenis(!revealed, { scrollToHash: true });
 
   // WebGL 첫 프레임이 그려지면 HTML 대체 헤드라인을 페이드아웃
   const [sceneReady, setSceneReady] = useState(false);

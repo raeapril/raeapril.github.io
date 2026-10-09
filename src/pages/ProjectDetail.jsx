@@ -3,8 +3,7 @@ import { WORK } from "../data/work";
 import CloverIcon from "../components/CloverIcon";
 import { useLenis } from "../hooks/useLenis";
 import { useFrame } from "../hooks/useFrame";
-import { clamp, ease } from "../lib/math";
-import { prefersReducedMotion } from "../lib/motion";
+import { clamp, ease, lerp, pad2 } from "../lib/math";
 
 /** 주소 해시(#rz)에 맞는 프로젝트 순번. 없으면 첫 프로젝트 */
 const indexFromHash = () => {
@@ -15,10 +14,8 @@ const indexFromHash = () => {
 // 클로버는 자리(slot) 폭의 이만큼만 채운다
 const CLOVER_SCALE = 0.7;
 
-// 섹션 사이 간격 (Screens · Overview · Next 공통)
+// 섹션 사이 간격. 구분선이 있는 곳은 절반(HALF_GAP)씩 선 위아래로 나눠 쓴다
 const SECTION_GAP = "pt-[clamp(80px,8.5vw,152px)]";
-
-// 섹션 간격의 절반 — 구분선을 그 가운데에 둘 때 위아래로 나눠 쓴다
 const HALF_GAP = "pt-[clamp(40px,4.25vw,76px)]";
 
 /**
@@ -42,14 +39,16 @@ function Divider({ reverse = false }) {
   );
 }
 
-const MEDIA_RADIUS = "rounded-[clamp(16px,1.8vw,28px)]";
+// 이미지 상자 공통 (둥근 모서리 + 로딩 전 바탕색)
+const MEDIA = "overflow-hidden bg-[#151517] rounded-[clamp(16px,1.8vw,28px)]";
 const SECTION_TITLE = "site-display m-0 text-[clamp(40px,5.6vw,104px)] leading-[0.9]";
-const LABEL = "font-mono text-xs uppercase tracking-[0.04em] text-point";
+const LABEL = "site-caption text-point";
+const SCREEN_ALT = { Mobile: "모바일", Web: "웹" };
 
 /** 이미지 위 왼쪽 아래에 붙는 유리 캡션 */
-function ShotCaption({ n, children, className = "" }) {
+function ShotCaption({ n, children }) {
   return (
-    <figcaption className={`pointer-events-none absolute inset-x-4 bottom-4 flex ${className}`}>
+    <figcaption className="pointer-events-none absolute inset-x-4 bottom-4 flex">
       <span
         className="flex items-center gap-2.5 rounded-full px-3.5 py-[9px] font-mono text-[11px] uppercase tracking-[0.04em] text-cream backdrop-blur-[14px] backdrop-saturate-[1.6]"
         style={{
@@ -65,20 +64,25 @@ function ShotCaption({ n, children, className = "" }) {
   );
 }
 
-function MetaItem({ k, children }) {
+const META_VALUE = "type-title text-[clamp(20px,1.6vw,26px)] leading-[1.25]";
+
+/** 정보 한 칸. value 는 큰 글자로, 그 외 꾸밈이 필요하면 children 으로 */
+function MetaItem({ k, value, children }) {
   return (
     <div className="flex flex-col gap-3 pr-6 pt-6">
       <dt className="site-caption">{k}</dt>
-      <dd className="m-0 flex flex-col gap-3.5">{children}</dd>
+      <dd className="m-0 flex flex-col gap-3.5">{value != null ? <span className={META_VALUE}>{value}</span> : children}</dd>
     </div>
   );
 }
-const META_VALUE = "type-title text-[clamp(20px,1.6vw,26px)] leading-[1.25]";
+
+// 동작 줄이기 설정은 매 프레임 matchMedia 를 새로 만들지 않고 한 번 만든 걸 읽는다
+const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 function ProjectDetail() {
   const [index, setIndex] = useState(indexFromHash);
   const lenis = useLenis();
-  const prog = useRef(null);
+  const progRef = useRef(null);
   const heroTxt = useRef(null);
   const canvasHost = useRef(null);
   const clover = useRef(null);
@@ -91,7 +95,7 @@ function ProjectDetail() {
   const p = WORK[index];
   const next = WORK[(index + 1) % WORK.length];
   const hasOverview = !!(p.overview || p.process.length);
-  const appScreens = p.screens.every((sc) => sc.label === "Mobile");
+  const appLayout = p.screensLayout === "app";
 
   // "다음 프로젝트" 로 해시가 바뀌면 같은 페이지에서 내용만 바꾸고 맨 위로, 클로버는 한 바퀴
   useEffect(() => {
@@ -124,29 +128,37 @@ function ProjectDetail() {
     };
   }, []);
 
+  // 매 프레임: 레이아웃 값을 먼저 모두 읽고(강제 리플로 1번), 바뀐 것만 쓴다
+  const last = useRef({ prog: -1, hero: -1 });
   useFrame(() => {
     const y = window.scrollY;
     const vh = window.innerHeight;
     const max = document.documentElement.scrollHeight - vh;
-    if (prog.current) prog.current.style.width = `${max > 0 ? (y / max) * 100 : 0}%`;
+    // 섹션마다 비워 둔 자리(slot). 히어로 자리는 글자와 함께 올라가므로 매번 잰다
+    const slots = clover.current
+      ? [slotHero, slotScreens, slotOverview, slotNext].flatMap(({ current: el }) => {
+          if (!el) return [];
+          const b = el.getBoundingClientRect();
+          return [{ cx: b.left + b.width / 2, cy: b.top + b.height / 2, w: b.width, doc: b.top + y + b.height / 2 }];
+        })
+      : [];
 
-    // 히어로 글자는 위로 살짝 빠지며 흐려진다
-    if (!prefersReducedMotion() && heroTxt.current && y <= vh * 1.2) {
-      const k = clamp(y / vh);
-      heroTxt.current.style.transform = `translate3d(0,${-y * 0.12}px,0)`;
-      heroTxt.current.style.opacity = 1 - k * 0.7;
+    const prog = max > 0 ? y / max : 0;
+    if (prog !== last.current.prog && progRef.current) {
+      progRef.current.style.width = `${prog * 100}%`;
+      last.current.prog = prog;
     }
 
-    if (!clover.current) return;
-    // 섹션마다 비워 둔 자리(slot)로 클로버가 옮겨 다닌다. 슬롯이 화면 가운데 올 때 그 자리에 도착
-    const slots = [slotHero, slotScreens, slotOverview, slotNext]
-      .map((r) => r.current)
-      .filter(Boolean)
-      .map((el) => {
-        const b = el.getBoundingClientRect();
-        return { cx: b.left + b.width / 2, cy: b.top + b.height / 2, w: b.width, doc: b.top + y + b.height / 2 };
-      });
+    // 히어로 글자는 위로 살짝 빠지며 흐려진다
+    const heroY = Math.min(y, vh * 1.2);
+    if (!reducedMotionQuery.matches && heroTxt.current && heroY !== last.current.hero) {
+      heroTxt.current.style.transform = `translate3d(0,${-heroY * 0.12}px,0)`;
+      heroTxt.current.style.opacity = 1 - clamp(heroY / vh) * 0.7;
+      last.current.hero = heroY;
+    }
+
     if (!slots.length) return;
+    // 슬롯이 화면 가운데 올 때 그 자리에 도착하도록 구간을 나눠 보간한다
     const anchors = slots.map((s, i) => (i === 0 ? 0 : Math.min(max, Math.max(0, s.doc - vh / 2))));
     for (let i = 1; i < anchors.length; i++) anchors[i] = Math.max(anchors[i], anchors[i - 1] + 1);
     let i = 0;
@@ -154,16 +166,12 @@ function ProjectDetail() {
     const A = slots[i];
     const B = slots[Math.min(i + 1, slots.length - 1)];
     const seg = i >= anchors.length - 1 ? 0 : ease(clamp((y - anchors[i]) / (anchors[i + 1] - anchors[i])));
-    clover.current.setTarget(
-      A.cx + (B.cx - A.cx) * seg,
-      A.cy + (B.cy - A.cy) * seg,
-      (A.w + (B.w - A.w) * seg) * CLOVER_SCALE
-    );
+    clover.current.setTarget(lerp(A.cx, B.cx, seg), lerp(A.cy, B.cy, seg), lerp(A.w, B.w, seg) * CLOVER_SCALE);
   });
 
   return (
     <div className="relative min-h-screen overflow-x-clip bg-night text-cream">
-      <div ref={prog} className="fixed left-0 top-0 z-[60] h-0.5 w-0 bg-point" />
+      <div ref={progRef} className="fixed left-0 top-0 z-[60] h-0.5 w-0 bg-point" />
       <div ref={canvasHost} aria-hidden="true" className="pointer-events-none fixed inset-0 z-40" />
 
       <header className="pointer-events-none fixed inset-x-0 top-4 z-50 flex justify-center px-4">
@@ -179,7 +187,7 @@ function ProjectDetail() {
               ← Work
             </a>
             <span className="whitespace-nowrap font-mono text-xs text-dim">
-              {p.no} / N°{String(WORK.length).padStart(2, "0")}
+              {p.no} / N°{pad2(WORK.length)}
             </span>
           </div>
         </nav>
@@ -190,7 +198,7 @@ function ProjectDetail() {
         <div ref={heroTxt}>
           <div className="grid items-end gap-[clamp(24px,4vw,80px)] min-[700px]:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
             <div className="flex min-w-0 flex-col gap-[clamp(20px,2.4vw,36px)]">
-              <div className="flex flex-wrap items-center gap-3 font-mono text-xs uppercase tracking-[0.04em]">
+              <div className="site-caption flex flex-wrap items-center gap-3">
                 <span className="text-point">{p.no}</span>
                 <span className="text-sub">{p.client}</span>
               </div>
@@ -225,7 +233,7 @@ function ProjectDetail() {
           </div>
         </div>
         <div
-          className={`mt-[clamp(32px,4vw,64px)] aspect-[1920/500] min-h-[180px] w-full overflow-hidden bg-[#151517] ${MEDIA_RADIUS}`}
+          className={`mt-[clamp(32px,4vw,64px)] aspect-[1920/500] min-h-[180px] w-full ${MEDIA}`}
         >
           <img
             src={p.thumb}
@@ -237,17 +245,9 @@ function ProjectDetail() {
 
       <main className="site-x">
         <dl className="m-0 mt-[clamp(24px,3vw,48px)] grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))]">
-          <MetaItem k="Role">
-            <span className={META_VALUE}>{p.role}</span>
-          </MetaItem>
-          {p.period && (
-            <MetaItem k="Period">
-              <span className={META_VALUE}>{p.period}</span>
-            </MetaItem>
-          )}
-          <MetaItem k="Platform">
-            <span className={META_VALUE}>{p.platform}</span>
-          </MetaItem>
+          <MetaItem k="Role" value={p.role} />
+          {p.period && <MetaItem k="Period" value={p.period} />}
+          <MetaItem k="Platform" value={p.platform} />
           <MetaItem k="Contribution">
             {/* 모바일에선 막대가 아래 구분선과 겹쳐 보이지 않게 퍼센트 옆에 붙인다 */}
             <span className="flex flex-col gap-3.5 max-[699px]:flex-row max-[699px]:items-center max-[699px]:gap-4">
@@ -275,49 +275,31 @@ function ProjectDetail() {
             </div>
             <div ref={slotScreens} className="aspect-square w-[clamp(96px,10vw,180px)] shrink-0" />
           </div>
-          {appScreens ? (
-            // 앱 화면만 있는 프로젝트: 700px 이상은 같은 크기로 나란히, 모바일은 두 번째 장을 빼고 세로로
-            <div className="grid grid-cols-1 gap-[clamp(12px,1.2vw,20px)] min-[700px]:grid-cols-3">
-              {p.screens.map((sc, i) => (
-                <figure
-                  key={sc.src}
-                  className={`group relative m-0 aspect-[665/1302] min-w-0 overflow-hidden bg-[#151517] ${MEDIA_RADIUS} ${
-                    i === 1 ? "max-[699px]:hidden" : ""
-                  }`}
-                >
-                  <img
-                    src={sc.src}
-                    alt={`${p.name} 앱 화면 ${i + 1}`}
-                    loading="lazy"
-                    className="block h-full w-full object-cover object-top transition-transform duration-[1200ms] ease-smooth group-hover:scale-[1.04]"
-                  />
-                  <ShotCaption n={String(i + 1).padStart(2, "0")}>{sc.label}</ShotCaption>
-                </figure>
-              ))}
-            </div>
-          ) : (
-            // 모바일 + 웹: 700px 이상에선 칸 폭을 이미지 비율(ratio)대로 나눠 두 칸 높이가 같고 잘리지 않게
-            <div className="flex flex-col gap-[clamp(12px,1.2vw,20px)] min-[700px]:flex-row">
-              {p.screens.map((sc, i) => {
-                const mobile = sc.label === "Mobile";
-                return (
-                  <figure
-                    key={sc.src}
-                    style={{ "--r": sc.ratio }}
-                    className={`group relative m-0 aspect-[var(--r)] min-w-0 overflow-hidden bg-[#151517] min-[700px]:flex-[var(--r)_1_0%] ${MEDIA_RADIUS}`}
-                  >
-                    <img
-                      src={sc.src}
-                      alt={`${p.name} ${mobile ? "모바일" : "웹"} 화면`}
-                      loading="lazy"
-                      className="block h-full w-full object-cover object-top transition-transform duration-[1200ms] ease-smooth group-hover:scale-[1.04]"
-                    />
-                    <ShotCaption n={String(i + 1).padStart(2, "0")}>{sc.label}</ShotCaption>
-                  </figure>
-                );
-              })}
-            </div>
-          )}
+          {/* 앱(screensLayout: "app"): 같은 크기 화면을 격자로, 모바일은 hideOnMobile 인 장을 빼고 세로로
+              그 외: 700px 이상에선 칸 폭을 이미지 비율(ratio)대로 나눠 높이가 같고 잘리지 않게 */}
+          <div
+            className={`gap-[clamp(12px,1.2vw,20px)] ${
+              appLayout ? "grid grid-cols-1 min-[700px]:grid-cols-3" : "flex flex-col min-[700px]:flex-row"
+            }`}
+          >
+            {p.screens.map((sc, i) => (
+              <figure
+                key={sc.src}
+                style={{ "--r": sc.ratio }}
+                className={`group relative m-0 aspect-[var(--r)] min-w-0 ${MEDIA} ${
+                  appLayout ? "" : "min-[700px]:flex-[var(--r)_1_0%]"
+                } ${sc.hideOnMobile ? "max-[699px]:hidden" : ""}`}
+              >
+                <img
+                  src={sc.src}
+                  alt={`${p.name} ${SCREEN_ALT[sc.label] ?? sc.label} 화면 ${i + 1}`}
+                  loading="lazy"
+                  className="block h-full w-full object-cover object-top transition-transform duration-[1200ms] ease-smooth group-hover:scale-[1.04]"
+                />
+                <ShotCaption n={pad2(i + 1)}>{sc.label}</ShotCaption>
+              </figure>
+            ))}
+          </div>
         </section>
 
         {/* Overview: 개요 + 키워드 + 맡은 일 */}
@@ -375,7 +357,7 @@ function ProjectDetail() {
               </span>
             </div>
             <div className="relative w-[clamp(110px,13vw,220px)] shrink-0">
-              <div className={`aspect-square overflow-hidden bg-[#151517] ${MEDIA_RADIUS}`}>
+              <div className={`aspect-square ${MEDIA}`}>
                 <img
                   src={next.thumbClover}
                   alt={`${next.name} 썸네일`}
@@ -394,7 +376,7 @@ function ProjectDetail() {
 
       <footer className="site-x pb-8 pt-6">
         <div className="flex flex-wrap items-center justify-between gap-3 pt-6 font-mono text-xs text-dim">
-          <span>© 2026 RAE APRIL. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} RAE APRIL. All rights reserved.</span>
           <span>Web Publisher · Seoul, KR</span>
           <a href="/#work">All Work ↗</a>
         </div>
