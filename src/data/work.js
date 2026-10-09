@@ -6,15 +6,8 @@ import clabImg from "../assets/clab.jpg";
 import mojImg from "../assets/moj.jpg";
 import etechhiveImg from "../assets/etechhive.jpg";
 
-import rzImgMo from "../assets/rz_mo.jpg";
-import bankitImgMo from "../assets/bankit_mo.jpg";
-import jigutImgMo from "../assets/jigu_mo.jpg";
-import msaferImgMo from "../assets/msafer_mo.jpg";
-import clabImgMo from "../assets/clab_mo.jpg";
-import mojImgMo from "../assets/moj_mo.jpg";
-import etechhiveImgMo from "../assets/etechhive_mo.jpg";
 
-// 데스크톱 호버 시 3D 유리 클로버 안에 들어가는 1:1 썸네일 (없으면 thumbMobile 을 가운데 정사각형으로 잘라 씀)
+// 데스크톱 호버 시 3D 유리 클로버 안에 들어가는 1:1 썸네일
 import rzImgSq from "../assets/rz_sq.jpg";
 import bankitImgSq from "../assets/bankit_sq.jpg";
 import jigutImgSq from "../assets/jigu_sq.jpg";
@@ -23,7 +16,7 @@ import clabImgSq from "../assets/clab_sq.jpg";
 import mojImgSq from "../assets/moj_sq.jpg";
 import etechhiveImgSq from "../assets/etechhive_sq.jpg";
 
-// 상세 페이지 Screens 전용 이미지 (없으면 thumbMobile + thumbClover 두 칸)
+// 상세 페이지 Screens 전용 이미지 (없으면 대표 정사각 썸네일 한 칸)
 import rzDetail01 from "../assets/rz_detail_01.jpg";
 import rzDetail02 from "../assets/rz_detail_02.jpg";
 import rzDetail03 from "../assets/rz_detail_03.jpg";
@@ -50,7 +43,6 @@ const PROJECTS = [
     contrib: 100,
     desc: "앱 접근성 인증 마크 획득",
     thumb: rzImg,
-    thumbMobile: rzImgMo,
     thumbClover: rzImgSq,
     // 앱이라 웹 화면 대신 앱 화면 3장
     screens: [
@@ -77,7 +69,6 @@ const PROJECTS = [
     contrib: 90,
     desc: "웹/앱 접근성 인증 마크 획득",
     thumb: bankitImg,
-    thumbMobile: bankitImgMo,
     thumbClover: bankitImgSq,
     // ratio = 이미지 가로/세로 (두 칸 높이를 맞추는 데 씀)
     screens: [
@@ -103,7 +94,6 @@ const PROJECTS = [
     contrib: 100,
     desc: "GDWEB 디자인 어워드 수상",
     thumb: jigutImg,
-    thumbMobile: jigutImgMo,
     thumbClover: jigutImgSq,
     screens: [
       { src: jiguDetail01, label: "Mobile", ratio: 665 / 1131 },
@@ -128,7 +118,6 @@ const PROJECTS = [
     contrib: 80,
     desc: "프론트엔드 UI 개발 기여",
     thumb: clabImg,
-    thumbMobile: clabImgMo,
     thumbClover: clabImgSq,
     screens: [
       { src: clabDetail01, label: "Mobile", ratio: 665 / 1131 },
@@ -153,7 +142,6 @@ const PROJECTS = [
     contrib: 100,
     desc: "공공 서비스 구축",
     thumb: msaferImg,
-    thumbMobile: msaferImgMo,
     thumbClover: msaferImgSq,
     screens: [
       { src: msaferDetail01, label: "Mobile", ratio: 665 / 1133 },
@@ -178,7 +166,6 @@ const PROJECTS = [
     contrib: 100,
     desc: "다양한 동적 인터랙션 구현",
     thumb: mojImg,
-    thumbMobile: mojImgMo,
     thumbClover: mojImgSq,
     screens: [
       { src: mojDetail01, label: "Mobile", ratio: 665 / 1156 },
@@ -203,7 +190,6 @@ const PROJECTS = [
     contrib: 100,
     desc: "다양한 동적 인터랙션 구현",
     thumb: etechhiveImg,
-    thumbMobile: etechhiveImgMo,
     thumbClover: etechhiveImgSq,
     screens: [
       { src: etechhiveDetail01, label: "Mobile", ratio: 665 / 1156 },
@@ -235,7 +221,6 @@ export const WORK = PROJECTS.map((w, i) => ({
   process: (w.process ?? []).map((s, j) => ({ ...s, n: pad2(j + 1) })),
   // 상세 Screens 칸들. 따로 정하지 않으면 모바일(세로) + 웹(정사각) 두 칸
   screens: w.screens ?? [
-    { src: w.thumbMobile, label: "Mobile", ratio: 4 / 5 },
     { src: w.thumbClover, label: "Web", ratio: 1 },
   ],
 }));

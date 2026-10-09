@@ -77,8 +77,8 @@ function Scene({ onReady, introStart = null, autoRotate = true }) {
         return;
       }
       if (disposed || !hostRef.current) return;
-      // 클로버 안 썸네일: 1:1 전용 이미지, 없으면 정사각형에 가까운 모바일용 (데스크톱용은 3.8:1 배너)
-      const thumbs = WORK.map((w) => w.thumbClover ?? w.thumbMobile);
+      // 클로버 안 썸네일: 1:1 전용 이미지
+      const thumbs = WORK.map((w) => w.thumbClover);
       const s = mod.createCloverScene(hostRef.current, { autoRotate, thumbs });
       // 캔버스에 그리는 타이포가 대체 폰트로 찍히지 않도록 웹폰트 로드를 기다린다
       try {
