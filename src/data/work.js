@@ -33,6 +33,12 @@ import jiguDetail01 from "../assets/jigu_detail_01.jpg";
 import jiguDetail02 from "../assets/jigu_detail_02.jpg";
 import clabDetail01 from "../assets/clab_detail_01.jpg";
 import clabDetail02 from "../assets/clab_detail_02.jpg";
+import msaferDetail01 from "../assets/msafer_detail_01.jpg";
+import msaferDetail02 from "../assets/msafer_detail_02.jpg";
+import mojDetail01 from "../assets/moj_detail_01.jpg";
+import mojDetail02 from "../assets/moj_detail_02.jpg";
+import etechhiveDetail01 from "../assets/etechhive_detail_01.jpg";
+import etechhiveDetail02 from "../assets/etechhive_detail_02.jpg";
 
 const PROJECTS = [
   {
@@ -132,7 +138,7 @@ const PROJECTS = [
     period: "2026.01 ~ 2026.03",
     role: "웹 퍼블리싱 및 프론트엔드 개발",
     overview: "기부 플랫폼 CLAB에서 웹 UI 마크업부터 프론트엔드 로직까지 맡았습니다.",
-    features: ["HTML", "CSS", "JavaScript", "Java", "MySQL", "View 템플릿"],
+    features: ["HTML", "CSS", "JavaScript", "Java", "MySQL"],
     process: [
       { t: "UI 마크업 · 스타일링", d: "전반적인 웹 UI 마크업 및 스타일링 수행" },
       { t: "프론트엔드 개발", d: "Java 및 MySQL 환경에 대한 이해를 바탕으로, 뷰(View) 템플릿 데이터 연동 및 클라이언트 사이드 스크립트(JavaScript) 로직 처리 등 프론트엔드 업무 수행" },
@@ -149,11 +155,15 @@ const PROJECTS = [
     thumb: msaferImg,
     thumbMobile: msaferImgMo,
     thumbClover: msaferImgSq,
+    screens: [
+      { src: msaferDetail01, label: "Mobile", ratio: 665 / 1133 },
+      { src: msaferDetail02, label: "Web", ratio: 1920 / 2488 },
+    ],
     link: "https://www.msafer.or.kr/index.do",
     period: "2025.10 ~ 2025.12",
     role: "웹 퍼블리싱",
     overview: "엠세이퍼(M-Safer) 웹 리뉴얼에서 레거시 코드를 웹 표준에 맞게 개편했습니다.",
-    features: ["HTML5", "CSS3", "jQuery", "리팩토링", "웹 표준"],
+    features: ["HTML5", "CSS3", "jQuery", "eGovFrame", "Refactoring"],
     process: [
       { t: "레거시 리팩토링", d: "HTML5, CSS3, jQuery를 활용한 기존 레거시 코드 리팩토링 및 웹 표준 준수 마크업 개편" },
       { t: "정보 구조 · 폼 개선", d: "복잡한 정보 구조와 폼(Form) 요소의 레이아웃을 개선하여 사용자 편의성 증대" },
@@ -162,7 +172,7 @@ const PROJECTS = [
   {
     id: "moj",
     tint: "#6fa8e8",
-    client: "네이버 해피빈 · 법무부",
+    client: "네이버 해피빈",
     name: "법무부",
     platform: "WEB",
     contrib: 100,
@@ -170,20 +180,24 @@ const PROJECTS = [
     thumb: mojImg,
     thumbMobile: mojImgMo,
     thumbClover: mojImgSq,
+    screens: [
+      { src: mojDetail01, label: "Mobile", ratio: 665 / 1156 },
+      { src: mojDetail02, label: "Web", ratio: 1920 / 2488 },
+    ],
     link: "https://happybean.naver.com/campaign/legalsupport2025",
-    period: "2026.01 ~ 2026.03",
-    role: "웹앱 퍼블리싱",
-    overview: "기부 플랫폼 CLAB에서 웹 UI 마크업부터 프론트엔드 로직까지 맡았습니다.",
-    features: ["HTML", "CSS", "JavaScript", "Java", "MySQL", "View 템플릿"],
+    period: "2026.01",
+    role: "적응형 퍼블리싱",
+    overview: "참여형 인터랙션과 생동감 있는 애니메이션으로, 사용자가 캠페인에 즐겁게 참여하도록 만들었습니다.",
+    features: ["HTML", "CSS", "JavaScript", "jQuery", "적응형", "Naver 템플릿"],
     process: [
-      { t: "UI 마크업 · 스타일링", d: "전반적인 웹 UI 마크업 및 스타일링 수행" },
-      { t: "프론트엔드 개발", d: "Java 및 MySQL 환경에 대한 이해를 바탕으로, 뷰(View) 템플릿 데이터 연동 및 클라이언트 사이드 스크립트(JavaScript) 로직 처리 등 프론트엔드 업무 수행" },
+      { t: "적응형 마크업 · 스타일링", d: "네이버 해피빈 템플릿 위에서 PC와 모바일 화면을 각각 최적화한 적응형 마크업으로, 어떤 기기에서도 캠페인 콘텐츠가 자연스럽게 읽히도록 구현" },
+      { t: "미션형 클릭 인터랙션", d: "물음표를 하나씩 눌러 지원 금액을 확인하는 퀴즈형 이벤트와, 미션을 마치면 콩을 받는 보상 흐름을 jQuery로 구현해 사용자의 직접 참여를 유도" },
     ],
   },
   {
     id: "etechhive",
     tint: "#2a8a8f",
-    client: "네이버 해피빈 · 환경부",
+    client: "네이버 해피빈",
     name: "환경부",
     platform: "WEB",
     contrib: 100,
@@ -191,14 +205,18 @@ const PROJECTS = [
     thumb: etechhiveImg,
     thumbMobile: etechhiveImgMo,
     thumbClover: etechhiveImgSq,
+    screens: [
+      { src: etechhiveDetail01, label: "Mobile", ratio: 665 / 1156 },
+      { src: etechhiveDetail02, label: "Web", ratio: 1920 / 2443 },
+    ],
     link: "https://happybean.naver.com/campaign/greencluster",
-    period: "2026.01 ~ 2026.03",
-    role: "웹앱 퍼블리싱",
-    overview: "기부 플랫폼 CLAB에서 웹 UI 마크업부터 프론트엔드 로직까지 맡았습니다.",
-    features: ["HTML", "CSS", "JavaScript", "Java", "MySQL", "View 템플릿"],
+    period: "2024.11",
+    role: "적응형 퍼블리싱",
+    overview: "참여형 인터랙션과 생동감 있는 애니메이션으로, 사용자가 캠페인에 즐겁게 참여하도록 만들었습니다.",
+    features: ["HTML", "CSS", "JavaScript", "jQuery", "적응형", "Naver 템플릿"],
     process: [
-      { t: "UI 마크업 · 스타일링", d: "전반적인 웹 UI 마크업 및 스타일링 수행" },
-      { t: "프론트엔드 개발", d: "Java 및 MySQL 환경에 대한 이해를 바탕으로, 뷰(View) 템플릿 데이터 연동 및 클라이언트 사이드 스크립트(JavaScript) 로직 처리 등 프론트엔드 업무 수행" },
+      { t: "적응형 마크업 · 스타일링", d: "네이버 해피빈 템플릿 위에서 PC와 모바일 화면을 각각 최적화한 적응형 마크업으로, 어떤 기기에서도 캠페인 콘텐츠가 자연스럽게 읽히도록 구현" },
+      { t: "미션형 클릭 인터랙션", d: "퍼즐을 클릭해 참여하는 이벤트와, 미션을 마치면 콩을 받는 보상 흐름을 jQuery로 구현해 사용자의 직접 참여를 유도" },
     ],
   },
 ];
